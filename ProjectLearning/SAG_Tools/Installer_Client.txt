@@ -1,0 +1,10 @@
+Software AG Installer Client Download
+	http://aquarius-blr.eur.ad.sag/
+
+http://aquarius-blr.eur.ad.sag/tools/admin.cgi
+
+License : C:\IS_srcCode\dev_Sep17\server\product\config
+
+http://aquarius-blr.eur.ad.sag/
+Latest dev build :
+	http://aquarius_blr.eur.ad.sag/cgi-bin/dataserveIS_PI_TR_DEV.cgi

@@ -1,0 +1,24 @@
+https://stackoverflow.com/questions/26697841/oracle-error-ora-28759-failure-to-open-file-when-requesting-utl-http-package
+
+http://ash2k12vmrd08:5555/
+
+http://vminvdu05:5555/
+
+
+
+
+
+
+Folders
+Putty
+notepad
+textpad
+pdf
+eclipse
+
+After cleaning SPM - It worked
+	Try to close java projects
+		eclipse
+		IS
+		SPM
+		CC

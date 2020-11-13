@@ -1,0 +1,23 @@
+Jenkins
+Jenkins->IS
+
+Look for develop and trunk sections:
+
+	IS_develop_continuous : frequency 4/day
+		Continuous just does sanity checking like rike compilation, running Junit etc. 
+	IS_develop_publish :	frequency 1-2/day. Used for providing build no. into itrac.
+		Publish build, publishes the new build of IS in repo, other than doing sanity checking.		
+	IS_develop_scheduled :	frequency 3-4/day 
+	IS_develop_trunk_merge : Last build - Nov 30, 2016 
+
+	IS_trunk_continuous : Only two builds are visible 12 and 14 sept.	
+	IS_trunk_NLS : frequency 1/day.	 
+	IS_trunk_publish : frequency 1/week.		
+	IS_trunk_scheduled : frequency 1/week.	
+
+Look for maintainance section only when you are interested on previous versions like 10.1, 9.12 etc.
+You will be interested on these sections only when you do the back porting.
+Mostly in customer issues which is raised in older version or in some security issues which need to be back-ported in previous few versions.
+Unlike dev branch, once this is checked in you can mark them fixed without providing build-no.
+
+*If test case failure is not there that means there is compilation failure.

@@ -1,0 +1,20 @@
+
+Provide the objective/ or make it ready
+Provide Heading/sub
+Linke issue - itrac no.
+Attach the files(patch) to be reviewed
+	Patch is created using SVN-Tortoise
+	Upload it using pre-commit() Not attachment.
+Add the reviewers.
+
+And you are done.
+
+http://ireview.eur.ad.sag/cru/CR-ESB-353
+
+
+IReview UI
+How to provide review comments
+How to accomodate/check reviews
+
+
+Note: Always use latest dev branch for patch creation otherwise you find some issue.

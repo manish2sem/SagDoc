@@ -1,0 +1,9 @@
+ReadyPlanner discutinued May 2015
+iTracRelease
+
+SR - Scope Ready - Planning
+TR - Technical Ready - Implementation
+MR - Market Ready - GA
+
+aquarius_blr.eur.ad.sag:IS_PR_TR_DEV
+
