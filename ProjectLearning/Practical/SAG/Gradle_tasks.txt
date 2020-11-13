@@ -1,0 +1,43 @@
+C:\IS_srcCode\ver_100\settings\ac.gradle
+
+gradlew eclipse
+gradlew build
+gradlew clean --refresh-dependencies -PuseLocalizationCache=false
+gradlew equinoxAcStartIS
+gradlew equinoxAcStopIS
+gradlew equinoxAcStartDebugIS 10033
+
+gradlew equinoxAcStartIS -x equinoxAcInstallIS -x createInstanceDefault -x javadoc
+gradlew equinoxAcStartIS -x javadoc -x test
+
+client
+server
+modules-osgi\launcher
+modules\proxy
+
+modules\migration                
+modules\migration-framework
+command-central\spm-impl
+monitors\cmp-impl
+
+
+gradlew eclipse
+gradlew equinoxAcStartIS -x javadoc
+gradlew equinoxAcStartDebugIS -x javadoc
+
+SPM:
+ gradlew equinoxAcCleanProfileSPM 
+ gradlew startSPM -PuseLocalizationCache=false
+ gradlew startSPM --offline
+ C:\Project\Code\branches\develop\features\spm 
+
+
+
+gradlew clean --refresh-dependencies
+
+
+C:\IS_srcCode\ver_912\staging\installs\profiles\IS\bin>startDebugMode.bat
+
+-PuseLocalizationCache=false
+
+

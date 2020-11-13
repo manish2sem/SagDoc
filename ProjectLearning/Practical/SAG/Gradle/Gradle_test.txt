@@ -1,0 +1,15 @@
+Executing only test classes
+	C:\IS_srcCode\ver_100_Latest>gradlew :modules:is-server:test
+
+
+Running test-cases inside pkg wmpublic
+
+C:\IS_srcCode\Ver10_02_Jan15\server\product\packages\WmPublic>C:\IS_srcCode\Ver10_02_Jan15\gradlew test
+
+gradlew test:is-server-test:integrationTest -DintegrationTest.single=jdbcpoolTest -x equinoxAcInstallIS -x  equinoxAcStartIS 
+
+
+
+
+
+

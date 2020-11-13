@@ -1,0 +1,27 @@
+    java.lang.AssertionError at ScheduleTest.java:36
+
+com.wm.app.b2b.server.PackageReplicatorTest > initializationError FAILED
+    java.lang.Exception
+    
+Soln:  stopped coming when empty @BeforeClass method is commented.
+/*	
+	@BeforeClass 
+	public void creatFolderStructure() throws IOException{
+
+	}
+	*/
+
+
+
+
+com.wm.app.b2b.server.PackageReplicatorTest > testDeleteDirectory FAILED
+    java.lang.IllegalStateException at PackageReplicatorTest.java:32
+    
+ Soln:
+ use below statement as instance variable
+ @Rule
+	public TemporaryFolder tempFolder = new TemporaryFolder();
+
+Remove below from testMethod 
+//	TemporaryFolder tempFolder = new TemporaryFolder();
+

@@ -1,0 +1,21 @@
+Steps for Internationalization:
+	Locale locale = new Locale("en", "US");// //no bundle for eng -> default
+	ResourceBundle bundle = ResourceBundle.getBundle("CoreJava.J_Importent.ResrcBundle.jenkov.Property.MyBundle", locale);
+	System.out.println(bundle.getString("Some-Key"));
+	
+Passing the parameters to the message-bundle
+	Some-Key = There {0} on {1}.
+	   //This part is same as previous
+		Locale locale = new Locale("en", "US");
+		ResourceBundle bundle = ResourceBundle.getBundle("CoreJava.J_Importent.ResrcBundle.param.Choice", currentLocale);		
+		String pattern = bundle.getString("Some-Key");
+	
+	// Using MessageFormat for passing into message.				
+		MessageFormat messageFormat = new MessageFormat("");
+		messageFormat.setLocale(currentLocale);
+		messageFormat.applyPattern(pattern);	//Passing the message(parametric) to messageFormat	
+		Object[] messageArguments = { "This is not localized", new Integer(3)}; // Passing the argument to parametric message.
+		String result = messageFormat.format(messageArguments);	
+
+
+If passing local into getBundle changes the language hten what is the need for setting language through browser settings???

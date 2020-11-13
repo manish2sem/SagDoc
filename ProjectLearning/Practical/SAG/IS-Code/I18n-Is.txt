@@ -1,0 +1,20 @@
+package com.wm.util.FacilityInfo;
+
+
+This is a static helper class for information related to facility codes; product, component, bundle and so on.  
+
+A named constant is defined for each valid facility code and a collection of facility code information is initialized on startup.
+
+This class was previously a static, private inner class in JournalLogger.
+It was refactored into a separate class in order to 
+1) improve the focus of JournalLogger, 
+2) allow direct access to facility information from other logging clases (specifically, the producer used icw the Shared Components Journal Logger).
+
+The facility code is unique and from it we can determine:
+	bundle name
+	product & component ID
+	logger name
+
+The facility code is the major code, and the message code is the minor code.
+
+
