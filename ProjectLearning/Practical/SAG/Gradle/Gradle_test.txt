@@ -1,15 +1,35 @@
 Executing only test classes
 	C:\IS_srcCode\ver_100_Latest>gradlew :modules:is-server:test
 
+running Unit test for package
+	C:\IS_srcCode\ver_100_Latest>gradlew packages:is-pkg-wmpublic:test
+	
+Testing of integration test[change test name]
+	C:\IS_srcCode\ver_100_Latest>gradlew :tests:is-server-test:integrationTest  --tests ExportMigrationSettingsTest -x equinoxAcInstallIS -x equinoxAcStartIS -x equinoxAcCreateProfileIS	
 
-Running test-cases inside pkg wmpublic
+Running integrationTest for one testcase file only : in this case .. it is ReportTest.java 
+[C:\IS-Checkout\freshDevelop\tests\server\src\integTest\java\pub\ReportTest.java]
+	C:\IS_srcCode\ver_100_Latest>gradlew :tests:is-server-test:integrationTest --tests *ReportTest --rerun-tasks -x copyExternalDependencies -x copyLicenseKeys -x copyPolicies -x copySSOPropertiesToIS -x copyInstanceTemplate -x configurePropertiesIni -x configurePropertiesIS -x syncPkg -x copyIntegrationServerResources -x equinoxAcCreateProfileIS -x generateP2 -x createInstanceDefault
+	
+	
 
-C:\IS_srcCode\Ver10_02_Jan15\server\product\packages\WmPublic>C:\IS_srcCode\Ver10_02_Jan15\gradlew test
-
-gradlew test:is-server-test:integrationTest -DintegrationTest.single=jdbcpoolTest -x equinoxAcInstallIS -x  equinoxAcStartIS 
-
-
-
-
+----------------------------------------------------------------------------------------------------------------------------------------
+| Running test-cases inside pkg wmpublic																								|
+| 	C:\IS_srcCode\Ver10_02_Jan15\server\product\packages\WmPublic>C:\IS_srcCode\Ver10_02_Jan15\gradlew test								|
+|	gradlew test:is-server-test:integrationTest -DintegrationTest.single=jdbcpoolTest -x equinoxAcInstallIS -x  equinoxAcStartIS 		|
+-----------------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
+
+gradlew :modules:is-server:compileJava jar --offline 
+for package syncing : gradlew packages:is-pkg-wmroot:assemble packages:is-pkg-wmroot:syncPkg -x test --offline 
+
+
+
+
+
+========================================================================================================
+compiling package
+	gradlew packages:is-pkg-wmpublic:compileJava
