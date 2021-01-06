@@ -1,0 +1,154 @@
+Git-Branch
+	creating a repo
+		cd to location where repo need to be created
+			$ git init
+			This initializes empty git repository in .git folder.
+		now add and commit few files in it.
+			$git add "file name"
+			$git commit -m "commit message"
+		
+		with "git log" we can see out commits history
+		with "git staus" we can see on which branch we are working 
+		
+		When we create a new repo(git init), git automatically creates default branch "master".
+		Every time when we make a commit the branch moves up to the latest commit.
+		That means master points to the latest commit.
+		
+	
+	Git-Branching:
+		Branches allows us to work on different version of the same file in parallel.
+		Branches resolve in separation of version of the same file. Develop, prode, bug-fix branch etc.
+		Whenever required we can merge two branches. Ex: when all bug-fixes are done (in bug-fix branch) we can merge it to master branch.
+	
+	Head : 
+		Head is a pointer which normally points to the branch not to the commit.
+		It tells us what we have checked-out.
+		It is the special pointer by which git knows where we are on.
+		
+		
+		
+	
+		
+	
+	Displaying all branch:
+		$git branch
+		and the current working brnach (i.e. checked-out branch, or the branch where head is pointing) is displayed with *.
+	
+	Creating new branch:
+		we create new branch using "git branch" command. Branches are instantiated from branch where the head-pointer is pointing.
+		$git branch branch-name
+	
+	Working on specific branch : 
+		To work on particular branch we need to check-out that branch.
+		$git checkout branch-name
+			Now, the head points to checked out branch branch-name
+		
+		With every commit, this branch will move up, leaving master and other branch (if created any) at the same position.
+		Similarly we can check-out other branch (say branch 2) and make commits. So these two branch will be heading on two different directions.
+	
+	Merging : 
+	Merging happens on branch to master. i.e. new changes of branch is merged to the master branch.
+	There are two types of merging.
+	
+	Fast-Forward Merge : 
+		This happens when there is direct path from master to branch.
+		In this case git will just move the master (pointer) to the same commit where the branch (pointer) is pointing.
+		
+		before merge make sure master is checked out.
+		
+		$git merge branch-name
+		in console you can see it is Fast-Forward.
+		
+	Deleteing Branch : flag -d. -D for force delete.
+		Once merging is successful you can safely delete branch.
+			$git branch -d branch-name
+			
+	Three way merge : 
+		This happens when there is no direct path from master to branch. i.e. master and branch both are modified while moving up. 
+		This occurs when both are checked out during different time and few commits are made in both branch and master.
+		To merge them Git looks for three commits
+		 - base commit two branches started from
+		 - Last commit of each branch
+		 
+		Merging process is same as Fast-Forward merge.
+		  - checkout master
+		  - $git merge branch-name
+		  - We need to provide commit message
+		in console you can see "Merge made by recursive strategy" instead of Fast-Forward.
+		 
+	
+		
+	Merge Conflict:
+		Merge conflict occurs when same line of same file is modified (both updated or one deleted) in two branches.
+		Merge conflict occurs while merging such branches with above conditions, and required three way merge.
+		Conflict occurs because git can not decide its own which change need to preserve while merging.
+		
+			$git checkout master
+			$git merge branch-name
+		In case of conflict we get error message as:
+			Merge conflict in file-name
+			fix conflicts and then commit the result.
+		
+		  $git status 
+		above command confirms that we are in the middle of the merge and provide options
+			
+		
+		Options on Merging while conflict: 
+			Abort the merge
+				$git merge --abort
+				This aborts the merge and staus confirms that we are back to clean Working-Tree.
+			Fix conflicts and commit the fixed file.
+	
+	
+	Detached head:
+		Usually head points to branch(master) which inturn points to latest commit.
+		When head directly points to commit (not through branch), we call it Detached head state.
+		
+		This can be achieved by checkout using commit hash (not branch name)
+			$git checkout 96g5n54
+		
+		Action on detached-head:
+			By performing another checkout this detached-head state can be discarded.
+				$git checkout master
+			You can commit any file in this detached state
+			
+			you can attach new branch to this detached-head.
+				$git branch branch-name		Creation of branch ar detached point
+				$git checkout branch-name	attaching bead to branch branch-name
+		
+		
+	git Stash : 
+		We can do checkout or merge only with clean (committed) working-tree oe clean staging-area.
+		If working-tree is not clean we will be blocked from changing branches or merging branches.
+		Stash command is the way to get clean state qickly (without commit)
+			$git checkout master 
+		change some file in master
+			$git checkout branch-name
+		By doing this we can loose our changes in master so git throws error message. 
+		So solution is 
+			$git stash
+		With this file changes of master is preserved. We can apply them later.
+		And we are back to clean state. staus command confirm this. Now we can safelt switch the branch or do merging.
+		
+		We can create multiple stash (i.e. saving points) in uncommitted branch and apply these points later.
+		Commads with stash
+			$git stash list : shows all stash points
+			$git stash apply : applies the most recent stash to working-tree
+				After apply we need to commit.
+			$git stash pop : applies the most recent stash to working-tree and removes the applied-stash.
+			$git stash apply <stash-level> : applies the particular stash (identified as <stash-level>) to working-tree.
+			
+			
+			
+			
+		
+			
+			
+	
+	
+	Rebase : 
+		W
+	
+		
+		
+	

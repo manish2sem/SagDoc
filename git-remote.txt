@@ -1,0 +1,124 @@
+Git Remote 
+
+Remote is a repository in another location from where we are working.
+	Example - Github, GitLab, BitBucket, Gerrit etc.
+	Note : Remote can be anothe directoru in our same local system.
+	
+	Here we assume github as remote
+	
+	Create a repo in github
+	Default branch is master
+	
+	
+Action:
+
+	Creating a repo in github - use UI
+	
+	Downloading remote repo into locl system
+		$git clone https://github.com/manish2sem/CoreJava.git
+		
+		clone operation setups our first remote which has default name origin
+		this origin points to the remote repo in github.
+	
+	Displaying all remotes
+		$git remote
+	       origin
+		   
+	Displaying full location of  remotes
+		$git remote -V
+	       origin https://github.com/manish2sem/CoreJava.git (fetch)
+		   origin https://github.com/manish2sem/CoreJava.git (push)
+	
+	Because of cloning, our local repo will have two branches : master (local branch), origin/master (remote tracking branch)
+	
+	Updating (synching) local branch from remote : fetch
+		$git fetch origin
+			this will fetch the new commit from remote to local
+			but the pointer head is not moved it still points to master (i.e. first commit)
+	
+	merging origin/master to master in local repo
+		$git merge origin/master
+			This is fast-forward merge
+	
+	git pull combines fetch and merge, it is equivalent to fetch + merge
+		$git pull
+	recomendation is to use separate getch and merge, this will avoid unexpected merge result.
+	
+	Commiting local repo changes to remote repo.
+		create/update changes into working area
+		add and commit them into local repo : $git commit -a -m "comments"
+		push them into master branch of remote repo : $git push origin master
+			This push relies on github authentication
+	
+	fork and upstream:
+	another user can't push there local repo changes into remote repo owned by first user. Because he will not have the right access
+	Option is to fork the existing repo (owned by first user) in git hub.
+	fork will create the copy of existing repo in github. And owner will be the second user who invoked the fork.
+	Now second user can clone this repo and mske the changes in local repo and finally push the changes into remote repo created by fork.
+	
+	How does second user get the access of first user's remote repo in github after logging in with his account?
+	
+	in local repo second user can add the another repo (which is infact a remote repo of first user) and give the name upstream.
+		$git remote add upstream  https://github.com/manish2sem/CoreJava.git
+		
+	By doing this second user links his remote remo with first user's remote repo and can synch upstream with origin.
+	
+	For tracking, fetch newly added upstream repo.
+		$git fetch upstream
+	
+	Removing remote remo:
+		$git remote remove upstream
+	
+	Sync origin and upstream:
+		Assumption : We are user2 and we dont have access to user1, so we cant push our local changes to user1's remote master.
+	   Case1: upstream to origin
+		createt new file to local area and add and commit it to local repo i.e. master. For user 1.
+		push it to origin master. Now the changes will reflect to user1 in github.
+		To synch this changes into user's 2 github repo follow the steps
+			in CLI of user2 merge upstream to master
+				$git merge upstream/master
+				This will bring the changes into local master
+			now push the local master to origin.
+			 $git push origin master
+			 
+	  Case1: origin to upstream
+		- creating a new branch in local master of user2
+			$git checkout -b "new-branch"		
+		- putting few files in this branch
+			create a new file and commit it into new-branch
+			$ git commit -a -m "update"			
+		- pushing this branch to remote master in github i.e. origin
+			$ git push origin new-branch		     
+		- Issue a pull request for merging this change into upstream i.e. user1's remote master.
+			for this open the user2's git hub account.
+			select the new-branch from Branch drop-down: and you can see the message that branch is 1 commit ahead of upstream branch. 
+			click on "New pull request" button.ou can update a commit message.
+			user1 will get the "pull request" notification
+			he can deny or do pr.
+		
+		
+		
+			
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+readme.md - md : mark dow
+	
+	
+	
+	
+	
