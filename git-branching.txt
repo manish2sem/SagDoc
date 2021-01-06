@@ -137,6 +137,7 @@ Git-Branch
 				After apply we need to commit.
 			$git stash pop : applies the most recent stash to working-tree and removes the applied-stash.
 			$git stash apply <stash-level> : applies the particular stash (identified as <stash-level>) to working-tree.
+			$git stash save "message" : With this we can see more helpful "message" on stash-point while stash list.
 			
 			
 			
