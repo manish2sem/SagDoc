@@ -1,5 +1,5 @@
 Executing only test classes
-	C:\IS_srcCode\ver_100_Latest>gradlew :modules:is-server:test
+	C:\IS_src
 
 running Unit test for package
 	C:\IS_srcCode\ver_100_Latest>gradlew packages:is-pkg-wmpublic:test
@@ -28,8 +28,11 @@ for package syncing : gradlew packages:is-pkg-wmroot:assemble packages:is-pkg-wm
 
 
 
-
-
 ========================================================================================================
 compiling package
 	gradlew packages:is-pkg-wmpublic:compileJava
+	
+
+
+Regression Test : 
+gradlew test:is-server-test:integrationTest --tests NodeResourceTest -x equinoxAcStartIS -x javadoc --offline
