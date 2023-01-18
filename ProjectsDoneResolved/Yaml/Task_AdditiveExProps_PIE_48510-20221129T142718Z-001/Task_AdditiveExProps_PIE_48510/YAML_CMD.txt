@@ -1,0 +1,33 @@
+cc delete templates composite is-layer-test1 --force
+cc exec templates composite import -i template.yaml
+cc list templates composite -e is-layer-test1
+cc exec templates composite apply is-layer-test1 -i sample.properties
+
+
+cc exec templates composite import -i localDevTemplate.yaml
+cc list templates composite -e tutorial
+cc exec templates composite apply tutorial -i windows.properties
+cc exec templates composite tutorial -i windows.properties
+
+
+
+sagcc delete templates composite is-layer-test1 --force
+sagcc exec templates composite import -i template.yaml
+sagcc list templates composite -e is-layer-test1
+sagcc exec templates composite apply is-layer-test1 -i sample.properties
+
+cc delete templates composite is-layer-test1 --force
+cc exec templates composite import -i template.yaml
+cc list templates composite -e is-layer-test1
+cc exec templates composite apply is-layer-test1 -i sample.properties
+
+File name and Location
+	template.yaml
+	C:\TEST\BootStrap\yaml>  
+
+
+To execute above commands we need following setups:
+	CC (bootstrap only, C:\SAG_Apps\CCInstallation\profiles\CCE\bin) should be up (Check at https://MCMAKUM01:8091/cce/web )
+	IS and corresponding SPM must be running
+	SPM must be configured in CC
+	SPM port and location must be configured in YAML.

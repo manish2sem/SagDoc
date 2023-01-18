@@ -1,0 +1,379 @@
+###############################################################################
+#  Copyright 2013 - 2018 Software AG, Darmstadt, Germany and/or its licensors
+#
+#   SPDX-License-Identifier: Apache-2.0
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License. 
+# 
+# Commands:
+#      To test Connection : cc list templates composite -e sag-is-config
+#   To test Connection : cc list landscape nodes local -e ONLINE -s https://localhost:8091
+                       # cc list landscape nodes local -e ONLINE -s http://localhost:8200
+#      to delete template alias if already loaded:
+#                   cc delete templates composite sag-is-config --force
+#      to import :  cc exec templates composite import -i C:\Work-Space\Itrac-WS\WF-14667-SFTP\template_SFTPServer.yaml -s https://localhost:8091  
+#      to Execute : cc exec templates composite apply sag-is-config nodes=local is.configs=sftp is.instance.name=default 
+#                   cc exec templates composite apply sag-is-config nodes=Localhost-dev07 is.configs=sftp is.instance.name=default -s https://localhost:8091
+
+#      cc list :    cc list templates composite -e is-layer-test1 -s http://localhost:8091
+#       
+#      Explaination : 
+#                   nodes=Localhost, here Localhost is name of SPM alias. 
+#                   You can find out this in CCE UI : Home >Instances > ALL : then check for field "Installation Alias"                                                          
+#                                              
+#
+###############################################################################
+alias: sag-is-config
+description: Integration Server configurations
+
+environments:
+  default:
+    nodes:               node
+   # is.um.url:           ${}               # REQUIRED: UM realm server or cluster URL
+    is.instance.name:    default           # EXISTING IS/MSR instance name    
+    is.configs:                            # Configurations to apply
+      - sftp                          # IS to UM messaging alias
+
+layers:
+  runtime:
+    templates: ${is.configs}
+
+templates:
+  sftp:
+    descripton: Configure Schedule Task
+    products:
+      integrationServer:
+        ${is.instance.name}:
+          configuration:
+            integrationServer-${is.instance.name}:              
+              IS-SFTP-SERVERALIAS:
+                IS-SFTP-SERVERALIAS-Servver105:
+                  ServerAlias: Server105
+                  HostName: eurekavm.eur.ad.sag
+                  Port: '2223'
+                  HostKeyLocation: ''
+                  Version: v2
+                  MinDhKeySize: '1024'
+                  MaxDhKeySize: '8192'
+                  KeyExchangeAlgoVer2:
+                  - curve25519-sha256@libssh.org
+                  - diffie-hellman-group15-sha512
+                  - diffie-hellman-group-exchange-sha1  
+                IS-SFTP-SERVERALIAS-Server150:
+                  ServerAlias: Server150
+                  HostName: eurekavm.eur.ad.sag
+                  Port: '2223'
+                  HostKeyLocation: ''
+                  Version: v2
+                  MinDhKeySize: '1024'
+                  MaxDhKeySize: '8192'
+                  KeyExchangeAlgoVer2:
+                  - curve25519-sha256@libssh.org
+                  - diffie-hellman-group15-sha512
+                  - diffie-hellman-group-exchange-sha1
+                IS-SFTP-SERVERALIAS-Server250:
+                  ServerAlias: Server250
+                  HostName: eurekjsdjsdhavm.eur.ad.sag
+                  Port: '2223'
+                  HostKeyLocation: ''
+                  Version: v2
+                  MinDhKeySize: '1024'
+                  MaxDhKeySize: '90000'
+                  KeyExchangeAlgoVer2:
+                  - curve25519-sha256@libssh.org
+                  - diffie-hellman-group15-sha512
+                  - diffie-hellman-group-exchange-sha1
+                IS-SFTP-SERVERALIAS-Server505:
+                  ServerAlias: Server505
+                  HostName: eurekavm.eur.ad.sag
+                  Port: '2223'
+                  HostKeyLocation: ''
+                  Version: v2
+                  MinDhKeySize: '1024'
+                  MaxDhKeySize: '8192'
+                  KeyExchangeAlgoVer2:
+                  - curve25519-sha256@libssh.org
+                  - diffie-hellman-group15-sha512
+                  - diffie-hellman-group-exchange-sha1                   
+              # IS-SFTP-SERVERALIAS:
+                # IS-SFTP-SERVERALIAS:
+                  # ServerAlias: Server101
+                  # HostName: eurekavm.eur.ad.sag
+                  # Port: '2223'
+                  # HostKeyLocation: ''
+                  # Version: v2
+                  # MinDhKeySize: '1014'
+                  # MaxDhKeySize: '8191'
+                  # KeyExchangeAlgoVer2:
+                  # - curve25519-sha256@libssh.org
+                  # - diffie-hellman-group15-sha512
+                  # - diffie-hellman-group-exchange-sha1
+                  # - diffie-hellman-group14-sha1
+                  # - ecdh-sha2-nistp256
+                  # - ecdh-sha2-nistp384
+                  # - ecdh-sha2-nistp521
+                  # - diffie-hellman-group1-sha1
+                  # - rsa2048-sha256
+                  # - rsa1024-sha1
+                  # MACS2CAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # MACC2SAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # CiphersS2CAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com
+                  # CiphersC2SAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com    
+                # IS-SFTP-SERVERALIAS:
+                  # ServerAlias: Server102
+                  # HostName: eurekavm.eur.ad.sag
+                  # Port: '2223'
+                  # HostKeyLocation: 'C:\SAG_src\IS_912\staging\installs\IntegrationServer\instances\default\config\sftp\temp\server01_eurekavm_eur_ad_sag_2223_ssh-rsa.pub'
+                  # Version: v2
+                  # MinDhKeySize: '1024'
+                  # MaxDhKeySize: '8192'
+                  # KeyExchangeAlgoVer2:
+                  # - curve25519-sha256@libssh.org
+                  # - diffie-hellman-group15-sha512
+                  # - diffie-hellman-group-exchange-sha1
+                  # - diffie-hellman-group14-sha1
+                  # - ecdh-sha2-nistp256
+                  # - ecdh-sha2-nistp384
+                  # - ecdh-sha2-nistp521
+                  # - diffie-hellman-group1-sha1
+                  # - rsa2048-sha256
+                  # - rsa1024-sha1
+                  # MACS2CAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # MACC2SAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # CiphersS2CAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com
+                  # CiphersC2SAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com
+                # IS-SFTP-SERVERALIAS:
+                  # ServerAlias: Server103
+                  # HostName: eurekavm.eur.ad.sag
+                  # Port: '2223'
+                  # HostKeyLocation: ''
+                  # Version: v2
+                  # MinDhKeySize: '1024'
+                  # MaxDhKeySize: '8192'
+                  # KeyExchangeAlgoVer2:
+                  # - curve25519-sha256@libssh.org
+                  # - diffie-hellman-group15-sha512
+                  # - diffie-hellman-group-exchange-sha1
+                  # - diffie-hellman-group14-sha1
+                  # - ecdh-sha2-nistp256
+                  # - ecdh-sha2-nistp384
+                  # - ecdh-sha2-nistp521
+                  # - diffie-hellman-group1-sha1
+                  # - rsa2048-sha256
+                  # - rsa1024-sha1
+                  # MACS2CAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # MACC2SAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # CiphersS2CAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com
+                  # CiphersC2SAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com
+                               
+provision:
+  default:
+    runtime: ${nodes}

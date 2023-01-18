@@ -1,0 +1,59 @@
+
+SAG100\IntegrationServer\instances\default\config\server.cnf
+
+Imp Class: 
+	 wm.server.admin.java
+	 	setExtendedSettingsVisible
+	 	setExtendedSettings
+	 
+	 wm.server.query.java
+	 	getExtendedSettingsVisible
+	 	
+
+
+
+Saving the file into server.cnf:
+ 	Server.saveConfiguration();
+		all system properties are looped and saved into server.cnf:
+			at the time of server startup (run method)   loadConfiguration() is called.
+			This method puts every value of server.conf into system properties by calling - Config.setProperty().
+		This implies if anything need to be added/modified has to be put into system properties.
+		need to find how new props are added!!! ->  
+			Config.setProperty(key, (String)val); line no. 1608
+			in side setSettings(){}
+		server.cnf is first made empty and then all system properties are added. TODO - Find deleting part of code
+			FileOutputStream itself takes care of deletion
+			 	FileOutputStream svrcnfOs = new FileOutputStream(confFile);
+			if want to append the data in old file then use boolean var true in constructor.
+			 	FileOutputStream svrcnfOs = new FileOutputStream(confFile, true);
+			 https://stackoverflow.com/questions/8544771/how-to-write-data-with-fileoutputstream-without-losing-old-data
+			
+		
+To make properties visible:
+	Add it into special property :  watt.server.extendedSettingsList
+
+Always called setSettings(newsettings) by passing your new settings.
+	This will automatically take care of some necessary filtaration + saving to server.cnf
+		
+
+How to run YAML file for updating
+	-- Install CC bootstrap installer
+	-- Create Yaml file
+	-- How to direct YAML for particular web-service
+	
+	
+	installing bootstrap 
+		C:\SAG_Apps\CC_BootStrapInstaller\CC-installer-10_1>cc-def-10.1-release-w64.bat -d C:\SAG_Apps\CC_BootStrapInstaller\Installation-dir -p manage123 --accept-license
+		
+	Installation logs end
+	####
+	#### You can logon to Command Central Web UI as Administrator/manage123
+	####
+	####     https://MCMAKUM01:8091/cce/web
+	####
+	#### NOTE: for external clients you may need to use external hostname or IP instead of MCMAKUM01
+	####
+	#### You can also explore Command Central CLI command by running from a NEW shell window:
+	####
+	####     sagcc --help
+	####

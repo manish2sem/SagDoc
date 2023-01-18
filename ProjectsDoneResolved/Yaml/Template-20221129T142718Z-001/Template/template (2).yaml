@@ -1,0 +1,527 @@
+alias: JnJ_Maintenance_9_12_v1_1
+description: Maintenance Activity on  J&J Environment server
+version: 1.1
+dslVersion: "1.1"
+changes:
+  - 1.0 v9.12  Initial version
+  - 1.1 v9.12  Added to install wmDesigner pacakge in Internal IS, DB schema update ,Place holder for Pre & Post Maintenance activities
+  - 1.2 v9.12  Added to update MWS products, fixes, files, wrapper configurations;IS package delete option & IS wrapper configurations
+  - 1_0 v9.12  Initial version to perform Maintenance Activity on 9.12 products using 10.3 CCE (Template is upgraded to 10.3 CCE standards )
+  - 1_1 v9.12  Added Delete Extended settings present in Internal Integration server using CCE 10.3
+environments:
+  default:                                  # defaults
+    actions:
+      ${cce.spm.alias}_preMaintenance.sh:
+        description:  "CC Scripts Cleanup - Move all .sh & .ksh scripts older then 1 day from <install_dir>/CommandCentral/actions to <install_dir>/CommandCentral/actions/Archive"
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          cd ${cc.home}../../actions
+          if [ -d ${cc.home}../../actions/Archive ]
+          then
+             cd ${cc.home}../../actions
+             find -maxdepth 1 -type f -mtime +1 -exec mv -v {} ./Archive \; 2>/dev/null 1>/dev/null
+          else
+             mkdir -p ${cc.home}../../actions/Archive
+             cd ${cc.home}../../actions
+             find -maxdepth 1 -type f -mtime +1 -exec mv -v {} ./Archive \; 2>/dev/null 1>/dev/null
+          fi
+
+      ${cce.spm.alias}_checkQuiescePort.sh:
+        description:  check IS in all nodes for Quiesce port and create the port if not present
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          LOGDIR=${CCEDEPOTDIR}/${COMMONDIR}/${scriptsLogDir}
+          LOGFILE=${logFileName}
+          echo "START of Maintenance checkQuiescePort Pre-Script" > $LOGDIR/$LOGFILE
+          if [ "${environment.type}" != "internal" ]
+          then  
+            QPORT_EG=`${cc.home}sagcc get configuration data ${spm.alias} integrationServer-${egwIs.instance.name} IS-QUIESCEPORT -s https://${cc.host}:${cc.port} -p ${cc.password}`
+            if [ "$QPORT_EG" != "COMMON-PORTS-${egwIs.quiesce.portAlias}" ]
+            then
+              echo "Quiesce Port not present in Node ${spm.alias}" >> $LOGDIR/$LOGFILE
+              CREATE_EG=${egwIs.quiesce.create.fileName}
+              {
+                echo "<PortSettings>"
+                echo "<Port primary=\"false\" alias=\"${egwIs.quiesce.portAlias}\">"
+                echo "<Enabled>true</Enabled>"
+                echo "<Type>STANDARD</Type>"
+                echo "<Number>${egwIs.quiesce.port}</Number>"
+                echo "<Protocol>HTTP</Protocol>"
+                echo "<Backlog>200</Backlog>"
+                echo "<KeepAliveTimeout>20000</KeepAliveTimeout>"
+                echo "<ThreadPool enabled=\"false\"/>"
+                echo "<ExtendedProperties>"
+                echo "<Property name=\"package\">WmRoot</Property>"
+                echo "<Property name=\"suspended\">false</Property>"
+                echo "<Property name=\"delay\">0</Property>"
+                echo "</ExtendedProperties>"
+                echo "<IPAccess accessType=\"USE_GLOBAL_DEFAULT\"/>"
+                echo "<URLAccess accessType=\"ALLOW_BY_DEFAULT\"/>"
+                echo "</Port>"
+                echo "</PortSettings>"
+              } > ./$CREATE_EG
+              UPDATE_EG=${egwIs.quiesce.update.fileName}
+              echo "COMMON-PORTS-${egwIs.quiesce.portAlias}" > ./$UPDATE_EG              
+              ${cc.home}sagcc create configuration data ${spm.alias} integrationServer-${egwIs.instance.name} COMMON-PORTS -i ${egwIs.quiesce.create.fileName} -s https://${cc.host}:${cc.port} -p ${cc.password}
+              ${cc.home}sagcc update configuration data ${spm.alias} integrationServer-${egwIs.instance.name} IS-QUIESCEPORT -i ${egwIs.quiesce.update.fileName} -s https://${cc.host}:${cc.port} -p ${cc.password}
+             echo "Quiesce Port Number ${egwIs.quiesce.port} with Alias ${egwIs.quiesce.portAlias} created on Node ${spm.alias}" >> $LOGDIR/$LOGFILE
+            else
+              echo "Quiesce Port Alias ${egwIs.quiesce.portAlias} present in Node ${spm.alias}" >> $LOGDIR/$LOGFILE
+            fi
+          fi
+          if [ "${environment.type}" != "egw" ]
+          then
+            QPORT_IN=`${cc.home}sagcc get configuration data ${spm.alias2} integrationServer-${internalIs.instance.name} IS-QUIESCEPORT -s https://${cc.host}:${cc.port} -p ${cc.password}`
+            if [ "$QPORT_IN" != "COMMON-PORTS-${internalIs.quiesce.portAlias}" ]
+            then 
+              echo "Quiesce Port not present in Node ${spm.alias2}" >> $LOGDIR/$LOGFILE
+              CREATE_IN=${internalIs.quiesce.create.fileName}
+              {
+                echo "<PortSettings>"
+                echo "<Port primary=\"false\" alias=\"${internalIs.quiesce.portAlias}\">"
+                echo "<Enabled>true</Enabled>"
+                echo "<Type>STANDARD</Type>"
+                echo "<Number>${internalIs.quiesce.port}</Number>"
+                echo "<Protocol>HTTP</Protocol>"
+                echo "<Backlog>200</Backlog>"
+                echo "<KeepAliveTimeout>20000</KeepAliveTimeout>"
+                echo "<ThreadPool enabled=\"false\"/>"
+                echo "<ExtendedProperties>"
+                echo "<Property name=\"package\">WmRoot</Property>"
+                echo "<Property name=\"suspended\">false</Property>"
+                echo "<Property name=\"delay\">0</Property>"
+                echo "</ExtendedProperties>"
+                echo "<IPAccess accessType=\"USE_GLOBAL_DEFAULT\"/>"
+                echo "<URLAccess accessType=\"ALLOW_BY_DEFAULT\"/>"
+                echo "</Port>"
+                echo "</PortSettings>"
+              } > ./$CREATE_IN
+              UPDATE_IN=${internalIs.quiesce.update.fileName}
+              echo "COMMON-PORTS-${internalIs.quiesce.portAlias}" > ./$UPDATE_IN
+              ${cc.home}sagcc create configuration data ${spm.alias2} integrationServer-${internalIs.instance.name} COMMON-PORTS -i ${internalIs.quiesce.create.fileName} -s https://${cc.host}:${cc.port} -p ${cc.password}
+              ${cc.home}sagcc update configuration data ${spm.alias2} integrationServer-${internalIs.instance.name} IS-QUIESCEPORT -i ${internalIs.quiesce.update.fileName} -s https://${cc.host}:${cc.port} -p ${cc.password}
+              echo "Quiesce Port Number ${internalIs.quiesce.port} with Alias ${internalIs.quiesce.portAlias} created on Node ${spm.alias2}" >> $LOGDIR/$LOGFILE
+            else
+              echo "Quiesce Port Alias ${internalIs.quiesce.portAlias} present in Node ${spm.alias2}" >> $LOGDIR/$LOGFILE
+            fi
+          fi
+          echo "END of Maintenance checkQuiescePort Pre-Script" >> $LOGDIR/$LOGFILE
+
+      ${cce.spm.alias}_setMaintenanceMode.sh:
+        description:  set IS in all nodes to Quiesce/ Pause mode
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          set -e
+          LOGDIR=${CCEDEPOTDIR}/${COMMONDIR}/${scriptsLogDir}
+          LOGFILE=${logFileName}
+          echo "START of Maintenance PreMaintenance Pre-script" >> $LOGDIR/$LOGFILE
+          if [ "${environment.type}" != "internal" ]
+          then
+            JOBID_EGIS=`${cc.home}sagcc exec lifecycle pause ${spm.alias} integrationServer-${egwIs.instance.name} properties=job.id includeHeaders=false -s https://${cc.host}:${cc.port} -p ${cc.password}`
+            ${cc.home}sagcc get jobmanager jobs $JOBID_EGIS properties=status -e "DONE" -w 300 -c 30 includeHeaders=false -s https://${cc.host}:${cc.port} -p ${cc.password}
+            ${cc.home}sagcc get monitoring state nodeAlias=${spm.alias} runtimeComponentId=integrationServer-${egwIs.instance.name} refresh=true -e "PAUSED" -w 300 -c 30 includeHeaders=false -s https://${cc.host}:${cc.port} -p ${cc.password}
+            echo "Integration Server on ${spm.alias} node is running in Quiesce mode" >> $LOGDIR/$LOGFILE
+          fi
+          if [ "${environment.type}" != "egw" ]
+          then
+          JOBID_IS=`${cc.home}sagcc exec lifecycle pause ${spm.alias2} integrationServer-${internalIs.instance.name} properties=job.id includeHeaders=false -s https://${cc.host}:${cc.port} -p ${cc.password}`
+          ${cc.home}sagcc get jobmanager jobs $JOBID_IS properties=status -e "DONE" -w 300 -c 30 includeHeaders=false -s https://${cc.host}:${cc.port} -p ${cc.password}
+          ${cc.home}sagcc get monitoring state nodeAlias=${spm.alias2} runtimeComponentId=integrationServer-${internalIs.instance.name} refresh=true -e "PAUSED" -w 600 -c 30 includeHeaders=false -s https://${cc.host}:${cc.port} -p ${cc.password}
+          echo "Integration Server on ${spm.alias2} node is running in Quiesce mode" >> $LOGDIR/$LOGFILE
+          fi
+          echo "END of Maintenance PreMaintenance Pre-Script" >> $LOGDIR/$LOGFILE
+
+    version: ${}
+    repo.product: ${}
+    repo.fix: ${} 
+      
+    os.username: ${}
+    os.password: ${}
+    os.port: ${}
+    os.auth.method: ${}
+    os.auth.key: ${}
+    os.platform: ${}
+    java.path: ${}
+
+
+    spm.host: ${}
+    spm.host2: ${}
+    spm.alias: ${}
+    spm.alias2: ${}
+    spm.port: ${}
+    spm.port2: ${}
+    spm.secure: ${}
+    spm.secure2: ${}
+    spm.distribution: ${}
+    spm.distribution2: ${}
+
+    spm.useImage: true
+    
+    gatewayIs.configure: ${}
+    internalIs.configure: ${}
+        
+    scriptsLogDir: ${}
+    # Database. See dbc template for parameters documentation
+
+    dbc.alias:           ${}                # database configurator node
+    dbc.host:            ${}                # database configurator host
+    dbc.fixes:           ${}                # fixes for database configurator
+    
+
+    # Database connection. 
+
+    db.type:             ${}                # REQUIRED: Database type: oracle,sqlserver,db2
+    db.host:             ${}                # REQUIRED: Database server hostname
+    db.port:             ${}                # REQUIRED: Database server port
+    db.name:             ${}                # Database name
+    db.username:         ${}                # Database username
+    db.password:         ${}                # Database password
+    db.url:              "jdbc:wm:${db.type}://${db.host}:${db.port};databaseName=${db.name}"   # Database url
+    db.alias:            ${}                # Database alias
+
+    tn.db.username:         ${}                # Database username
+    tn.db.password:         ${}                # Database password
+    tn.db.url:              "jdbc:wm:${db.type}://${db.host}:${db.port};databaseName=${db.name}"   # Database url
+    arc.db.url:         ${}    # Database url
+    arc.db.username:         ${}                # Database username
+    arc.db.password:         ${}                # Database password
+    pre.db.url:             "jdbc:wm:${db.type}://${db.host}:${db.port};databaseName=${db.name}"   # Database url
+    pre.db.username:         ${}                # Database username
+    pre.db.password:         ${}                # Database password
+    pra.db.url:             "jdbc:wm:${db.type}://${db.host}:${db.port};databaseName=${db.name}"   # Database url
+    pra.db.username:         ${}                # Database username
+    pra.db.password:         ${}                # Database password
+
+    # Database server admin connection for storage/user creation
+
+    is.tablespace.data:  ${}                # for Oracle/DB2
+    is.tablespace.index: ${}                # for Oracle/DB2
+    tn.tablespace.data:  ${}                # for Oracle/DB2
+    tn.tablespace.index: ${}                # for Oracle/DB2
+    arc.tablespace.data: ${}                # for Oracle/DB2
+    arc.tablespace.index: ${}                # for Oracle/DB2
+    pra.tablespace.data: ${}                # for Oracle/DB2
+    pra.tablespace.index: ${}                # for Oracle/DB2
+    pre.tablespace.data: ${}                # for Oracle/DB2
+    pre.tablespace.index: ${}                # for Oracle/DB2
+    # Schemas
+
+    db.components:        []               # Storage and all components by default
+    db.component.version: ${}               # DB components version
+    db.product.version:   ${}               # DB products version
+    env.password:     ${}                   # IS/MWS Administrator password
+
+    # Process Engine/Audit DB components
+    pre.db.components:    ${}
+    pra.db.components:    ${}
+
+    is.db.products:          ${}
+    tn.db.products:          ${}
+
+    # Fixes and patches
+
+    egw.fixes: ${}
+    egw.patches: ${}
+
+    internal.mws.fixes: ${}
+    internal.mws.patches: ${}
+
+    internal.fixes: ${} 
+    internal.patches: ${}
+
+    # CCE specific parameters
+    cc.home: ${}
+    cc.installer:  ${}
+    cc.credentialAlias.ssh:  ${}              # remote machine SSH credential alias defined in CCE Web UI
+    cc.host: ${}
+    cc.port: ${}
+    cc.password: ${}
+
+
+  gwy:                                                 # specific to EG server details
+    spm.alias:    ${}                                  # spm of Enterprise GateWay Server
+    spm.host:     ${}                                  # Host name for GateWay server
+    java.path:    ${}
+    install.dir:  ${}                                  # SAG installation directory  for GateWay server
+    egwIs.instance.name: ${}
+    instance.name: ${egwIs.instance.name}              # IS instance name for Enterprise Gateway server
+
+  internal:                                            # specific to Internal server details
+    spm.alias2:    ${}                                 # spm of Enterprise Internal Server
+    spm.host2:     ${}                                 # Host name for Internal server
+    java.path:     ${}
+    install.dir2:  ${}                                 # SAG installation directory  for Internal server
+    internalIs.instance.name: ${}
+    instance.name: ${internalIs.instance.name}         # IS instance name for Internal server
+    internalIs.license.key.alias: ${}                  # License file name for Internal IS
+
+
+###
+## Layers - groups of identically setup nodes to perform specific role
+## within this environment
+#####
+layers:
+  default:                                  # default configuration for all layers
+    productRepo: ${repo.product}            # repo to install products from
+    fixRepo:     ${repo.fix}                # repo to install fixes from
+    actions:
+      ${spm.alias}_preMaintenance.sh:
+        description:  "CC Scripts Cleanup - Move all .sh & .ksh scripts older then 1 day from <install_dir>/CommandCentral/actions to <install_dir>/CommandCentral/actions/Archive"
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          cd ${cc.home}../../actions
+          if [ -d ${cc.home}../../actions/Archive ]
+          then
+             cd ${cc.home}../../actions
+             find -maxdepth 1 -type f -mtime +1 -exec mv -v {} ./Archive \; 2>/dev/null 1>/dev/null
+          else
+             mkdir -p ${cc.home}../../actions/Archive
+             cd ${cc.home}../../actions
+             find -maxdepth 1 -type f -mtime +1 -exec mv -v {} ./Archive \; 2>/dev/null 1>/dev/null
+          fi
+  gatewayIS:
+    description: Maintenance activity on Internal IS
+    templates:   ${gatewayIs.configure}
+
+  internalMWS:
+    description: Maintenance activity on Internal MWS
+    templates:   ${internalMws.configure}
+
+  internalIS:
+    description: Maintenance activity on Internal IS
+    templates:   ${internalIs.configure}
+
+  dbc:                     
+    actions:           # DBC schema updation for IS/TN/ARC/PRA/PRE Products & Components 
+      ${spm.alias2}_migrateDBSchema.sh:
+        description:  DBC schema updation 
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          cd ${install.dir2}/common/db/bin
+          isFixes=`echo ${internal.fixes} | sed 's/[][]//g'`
+          if [[ $isFixes = *"wMFix.integrationServer.Core"* ]]
+          then
+            {
+              ./dbConfigurator.sh -a migrate -d ${db.type} -pr ${is.db.products} -v latest -l "${db.url}" -u ${db.username} -p ${db.password} -tsdata ${is.tablespace.data} -tsindex ${is.tablespace.index}
+              ./dbConfigurator.sh -a migrate -d ${db.type} -pr ${tn.db.products} -v latest -l "${tn.db.url}" -u ${tn.db.username} -p ${tn.db.password} -tsdata ${tn.tablespace.data} -tsindex ${tn.tablespace.index}
+              ./dbConfigurator.sh -a migrate -d ${db.type} -c ${arc.db.components} -v latest -l "${arc.db.url}" -u ${arc.db.username} -p ${arc.db.password} -tsdata ${arc.tablespace.data} -tsindex ${arc.tablespace.index}
+              ./dbConfigurator.sh -a migrate -d ${db.type} -c ${pra.db.components} -v latest -l "${pra.db.url}" -u ${pra.db.username} -p ${pra.db.password} -tsdata ${pra.tablespace.data} -tsindex ${pra.tablespace.index}
+              ./dbConfigurator.sh -a migrate -d ${db.type} -c ${pre.db.components} -v latest -l "${pre.db.url}" -u ${pre.db.username} -p ${pre.db.password} -tsdata ${pre.tablespace.data} -tsindex ${pre.tablespace.index}
+            }
+          fi
+          mwsFixes=`echo ${internal.mws.fixes} | sed 's/[][]//g'`
+          if [[ $mwsFixes = *"wMFix.MwsProgramFiles"* ]]
+          then
+            {
+              ./dbConfigurator.sh -a migrate -d ${db.type} -pr ${mws.db.products} -v latest -l "${mws.db.url}" -u ${mws.db.username} -p ${mws.db.password} -tsdata ${mws.tablespace.data} -tsindex ${mws.tablespace.index}
+            }
+          fi
+
+#External Script Call for Post Maintenance activities
+  sc:
+    actions:                 # Post-Maintenance activities
+      ${spm.alias2}_postMaintenance.sh:
+        description:  "CC Scripts Cleanup - Move all .sh & .ksh scripts older then 1 day from <install_dir>/CommandCentral/actions to <install_dir>/CommandCentral/actions/Archive"
+        target: POSIX
+        failOnError: true
+        phase: post
+        script: |
+          #!/bin/sh
+          cd ${cc.home}../../actions
+          if [ -d ${cc.home}../../actions/Archive ]
+          then
+             cd ${cc.home}../../actions
+             find -maxdepth 1 -type f -mtime +1 -exec mv -v {} ./Archive \; 2>/dev/null 1>/dev/null
+          else
+             mkdir -p ${cc.home}../../actions/Archive
+             cd ${cc.home}../../actions
+             find -maxdepth 1 -type f -mtime +1 -exec mv -v {} ./Archive \; 2>/dev/null 1>/dev/null
+          fi
+
+###
+## Inline templates - customized product list, fix list, runtime instances, files and configuration
+####
+templates:
+  # Maintenance Activities on Enterprise GateWay Integration Server in Quiesce Mode
+  gateway-is:
+    description: Enterprise Gateway IS activities in Quiesce mode
+    fixes: ${egw.fixes}
+    patches: ${egw.patches}
+    files:
+      #Property file copy
+      IntegrationServer/instances/${egwIs.instance.name}/packages/CCMaintenanceUtil.cnf: ${prop.filepath}
+    actions:
+      ${spm.alias}_egwISActivities.sh:
+        description:  Copy Maintenance and Support utility packages to Enterprise Gateway IS
+        target: POSIX
+        failOnError: true
+        phase: post
+        script: |
+          #!/bin/sh
+          cp -R ${CCEDEPOTDIR}/${COMMONDIR}/${EGWPKGDIR}/* ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages
+          cp -a ${CCEDEPOTDIR}/${COMMONDIR}/supportingPackage/CCE_MaintenenceUtility ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages
+          mv ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages/CCMaintenanceUtil.cnf ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages/CCE_MaintenenceUtility/config/CCMaintenanceUtil.cnf
+
+  # Maintenance Activities on Internal MWS
+  internal-mws:
+    description: Internal IS activities in Quiesce mode
+    files:
+      # MWS place holder for files copy like jars,etc
+
+    fixes: ${internal.mws.fixes}
+    patches: ${internal.mws.patches}
+    products:
+      MwsProgramFiles: # MWS core product
+        ${internal.mws.instance.name}: # MWS instance
+          configuration:
+            OSGI-MWS_${internal.mws.instance.name}:
+              COMMON-JAVASYSPROPS: #  MWS customer wrapper configurations section
+                COMMON-JAVASYSPROPS: |
+                  com.webmethods.content.security.hosts=*.jnj.com
+                  com.webmethods.content.security.disabled=true
+    actions: # scripts to modify MWS related configurations files
+      ${spm.alias2}_internalMWSActivities.sh:
+        description:  Invoke script to change jetty.xml and other MWS configuration files 
+        target: POSIX
+        failOnError: true
+        phase: post
+        script: |
+          #!/bin/sh
+          if [ "${isUpdateJettyXml}" = "true" ]
+          then
+            {
+               cd ${install.dir2}/profiles/MWS_${internal.mws.instance.name}/bin
+               ./shutdown.sh
+               cd ${install.dir2}/MWS/bin
+               ./mws.sh -s ${internal.mws.instance.name} getconfig jetty.xml
+               mv ${install.dir2}/MWS/server/${internal.mws.instance.name}/config/jetty.xml ${CCEDEPOTDIR}/${COMMONDIR}/${updatedJettyFileDir}/jetty.xml.bkp
+               cp ${CCEDEPOTDIR}/${COMMONDIR}/${updatedJettyFileDir}/jetty.xml ${install.dir2}/MWS/server/${internal.mws.instance.name}/config/jetty.xml 
+               ./mws.sh -s ${internal.mws.instance.name} putconfig jetty.xml
+               rm  -f ${install.dir2}/MWS/server/${internal.mws.instance.name}/config/jetty.xml
+               cd ${install.dir2}/profiles/MWS_${internal.mws.instance.name}/bin
+               ./startup.sh
+            }
+          fi
+
+  # Maintenance Activities on Internal Integration Server in Quiesce Mode
+  internal-is:
+    description: Internal IS activities in Quiesce mode
+    fixes: ${internal.fixes}
+    patches: ${internal.patches}
+    files:
+      #Property file copy
+      IntegrationServer/instances/${internalIs.instance.name}/packages/CCMaintenanceUtil.cnf: ${prop.filepath}
+    licenses:
+      "IntegrationServer/config/licenseKey.xml": ${internalIs.license.key.alias}
+    products:
+      wmprt:
+      integrationServer: # the core IS product that owns the instance
+        ${internalIs.instance.name}:
+          license.file: IntegrationServer/config/licenseKey.xml
+          package.list: WmDesigner
+          #configuration:
+            #integrationServer-${internalIs.instance.name}:
+              #IS-SYSPROPS:
+               # IS-SYSPROPS:
+                 # DeleteSettings:   # Delete Extended setting in internal IS
+                  #  watt.net.jsse.client.enabledProtocols=TLSv1,TLSv1.1,TLSv1.2
+            #OSGI-IS_${internalIs.instance.name}:
+              #COMMON-JAVASYSPROPS: #  IS customer wrapper configurations section
+                #COMMON-JAVASYSPROPS: |
+                   
+    actions:
+      ${spm.alias2}_internalISActivities.sh:
+        description:  Copy Maintenance and Support utility packages to Internal IS
+        target: POSIX
+        failOnError: true
+        phase: post
+        script: |
+          #!/bin/sh
+          cp -R ${CCEDEPOTDIR}/${COMMONDIR}/${INTERNALPKGDIR}/* ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages
+          cp -a ${CCEDEPOTDIR}/${COMMONDIR}/supportingPackage/CCE_MaintenenceUtility ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages
+          mv ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages/CCMaintenanceUtil.cnf ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages/CCE_MaintenenceUtility/config/CCMaintenanceUtil.cnf
+          
+# External Script Call
+
+
+  
+ 
+###
+## Provisioning map of layers to nodes for each environment type
+####
+provision:
+  egw:
+    gatewayIS: ["${spm.alias}"]
+    sc:  ["${spm.alias}"]
+
+  internal:
+    internalMWS: ["${spm.alias2}"]
+    internalIS: ["${spm.alias2}"]
+    dbc:   ["${spm.alias2}"]
+    sc:  ["${spm.alias2}"]
+
+  internal_egw:
+    gatewayIS:  ["${spm.alias}"]
+    internalMWS: ["${spm.alias2}"]
+    internalIS: ["${spm.alias2}"]
+    dbc:   ["${spm.alias2}"]
+    sc:  ["${spm.alias2}"]
+
+nodes:
+  default:
+    default:
+      secure: ${spm.secure}
+      bootstrapInfo:
+        installer:    ${cc.installer}
+        distribution: ${spm.distribution}
+        useImage:     ${spm.useImage}
+        port:         ${os.port}
+        credentials:  ${cc.credentialAlias.ssh}
+        javaPath: ${java.path}
+
+  egw:
+    ${spm.alias}:
+      host: ${spm.host}
+      port: ${spm.port}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir}
+
+  internal:
+    ${spm.alias2}:
+      host: ${spm.host2}
+      port: ${spm.port2}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir2}
+
+  internal_egw:
+    ${spm.alias}:
+      host: ${spm.host}
+      port:   ${spm.port}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir}
+
+    ${spm.alias2}:
+      host: ${spm.host2}
+      port:   ${spm.port2}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir2}
+

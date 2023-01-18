@@ -1,0 +1,302 @@
+alias: JnJ_Maintenance_v1_1
+description: Maintenance Activity on  J&J environment server
+version: 1.1
+changes:
+  - 1.0 v9.12  Initial version
+  - 1.1 v9.12  Added products to install wmDesigner in Internal IS
+environments:
+  default:                                  # defaults
+    actions:
+      checkQuiescePort.sh:
+        description:  check IS in all nodes for Quiesce port and create the port if not present
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          LOGDIR=${CCEDEPOTDIR}/${COMMONDIR}/${scriptsLogDir}
+          LOGFILE=${logFileName}
+          echo "START of Maintenance checkQuiescePort Pre-Script" > $LOGDIR/$LOGFILE
+          if [ "${environment.type}" != "internal" ]
+          then  
+            QPORT_EG=`${cc.home}sagcc get configuration data ${spm.alias} integrationServer-${egwIs.instance.name} IS-QUIESCEPORT`
+            if [ "$QPORT_EG" != "COMMON-PORTS-${egwIs.quiesce.portAlias}" ]
+            then
+              echo "Quiesce Port not present in Node ${spm.alias}" >> $LOGDIR/$LOGFILE
+              CREATE_EG=${egwIs.quiesce.create.fileName}
+              {
+                echo "<PortSettings>"
+                echo "<Port primary=\"false\" alias=\"${egwIs.quiesce.portAlias}\">"
+                echo "<Enabled>true</Enabled>"
+                echo "<Type>STANDARD</Type>"
+                echo "<Number>${egwIs.quiesce.port}</Number>"
+                echo "<Protocol>HTTP</Protocol>"
+                echo "<Backlog>200</Backlog>"
+                echo "<KeepAliveTimeout>20000</KeepAliveTimeout>"
+                echo "<ThreadPool enabled=\"false\"/>"
+                echo "<ExtendedProperties>"
+                echo "<Property name=\"package\">WmRoot</Property>"
+                echo "<Property name=\"suspended\">false</Property>"
+                echo "<Property name=\"delay\">0</Property>"
+                echo "</ExtendedProperties>"
+                echo "<IPAccess accessType=\"USE_GLOBAL_DEFAULT\"/>"
+                echo "<URLAccess accessType=\"ALLOW_BY_DEFAULT\"/>"
+                echo "</Port>"
+                echo "</PortSettings>"
+              } > ./$CREATE_EG
+              UPDATE_EG=${egwIs.quiesce.update.fileName}
+              echo "COMMON-PORTS-${egwIs.quiesce.portAlias}" > ./$UPDATE_EG              
+              ${cc.home}sagcc create configuration data ${spm.alias} integrationServer-${egwIs.instance.name} COMMON-PORTS -i ${egwIs.quiesce.create.fileName}
+              ${cc.home}sagcc update configuration data ${spm.alias} integrationServer-${egwIs.instance.name} IS-QUIESCEPORT -i ${egwIs.quiesce.update.fileName} 
+             echo "Quiesce Port Number ${egwIs.quiesce.port} with Alias ${egwIs.quiesce.portAlias} created on Node ${spm.alias}" >> $LOGDIR/$LOGFILE
+            else
+              echo "Quiesce Port Alias ${egwIs.quiesce.portAlias} present in Node ${spm.alias}" >> $LOGDIR/$LOGFILE
+            fi
+          fi
+          if [ "${environment.type}" != "egw" ]
+          then
+            QPORT_IN=`${cc.home}sagcc get configuration data ${spm.alias2} integrationServer-${internalIs.instance.name} IS-QUIESCEPORT`
+            if [ "$QPORT_IN" != "COMMON-PORTS-${internalIs.quiesce.portAlias}" ]
+            then 
+              echo "Quiesce Port not present in Node ${spm.alias2}" >> $LOGDIR/$LOGFILE
+              CREATE_IN=${internalIs.quiesce.create.fileName}
+              {
+                echo "<PortSettings>"
+                echo "<Port primary=\"false\" alias=\"${internalIs.quiesce.portAlias}\">"
+                echo "<Enabled>true</Enabled>"
+                echo "<Type>STANDARD</Type>"
+                echo "<Number>${internalIs.quiesce.port}</Number>"
+                echo "<Protocol>HTTP</Protocol>"
+                echo "<Backlog>200</Backlog>"
+                echo "<KeepAliveTimeout>20000</KeepAliveTimeout>"
+                echo "<ThreadPool enabled=\"false\"/>"
+                echo "<ExtendedProperties>"
+                echo "<Property name=\"package\">WmRoot</Property>"
+                echo "<Property name=\"suspended\">false</Property>"
+                echo "<Property name=\"delay\">0</Property>"
+                echo "</ExtendedProperties>"
+                echo "<IPAccess accessType=\"USE_GLOBAL_DEFAULT\"/>"
+                echo "<URLAccess accessType=\"ALLOW_BY_DEFAULT\"/>"
+                echo "</Port>"
+                echo "</PortSettings>"
+              } > ./$CREATE_IN
+              UPDATE_IN=${internalIs.quiesce.update.fileName}
+              echo "COMMON-PORTS-${internalIs.quiesce.portAlias}" > ./$UPDATE_IN
+              ${cc.home}sagcc create configuration data ${spm.alias2} integrationServer-${internalIs.instance.name} COMMON-PORTS -i ${internalIs.quiesce.create.fileName}
+              ${cc.home}sagcc update configuration data ${spm.alias2} integrationServer-${internalIs.instance.name} IS-QUIESCEPORT -i ${internalIs.quiesce.update.fileName}
+              echo "Quiesce Port Number ${internalIs.quiesce.port} with Alias ${internalIs.quiesce.portAlias} created on Node ${spm.alias2}" >> $LOGDIR/$LOGFILE
+            else
+              echo "Quiesce Port Alias ${internalIs.quiesce.portAlias} present in Node ${spm.alias2}" >> $LOGDIR/$LOGFILE
+            fi
+          fi
+          echo "END of Maintenance checkQuiescePort Pre-Script" >> $LOGDIR/$LOGFILE
+              
+      preMaintenance.sh:
+        description:  set IS in all nodes to Quiesce/ Pause mode
+        target: POSIX
+        failOnError: true
+        phase: pre
+        script: |
+          #!/bin/sh
+          set -e
+          LOGDIR=${CCEDEPOTDIR}/${COMMONDIR}/${scriptsLogDir}
+          LOGFILE=${logFileName}
+          echo "START of Maintenance PreMaintenance Pre-script" >> $LOGDIR/$LOGFILE
+          if [ "${environment.type}" != "internal" ]
+          then
+            JOBID_EGIS=`${cc.home}sagcc exec lifecycle pause ${spm.alias} integrationServer-${egwIs.instance.name} properties=job.id includeHeaders=false`
+            ${cc.home}sagcc get jobmanager jobs $JOBID_EGIS properties=status -e "DONE" -w 300 -c 30 includeHeaders=false
+            ${cc.home}sagcc get monitoring state nodeAlias=${spm.alias} runtimeComponentId=integrationServer-${egwIs.instance.name} refresh=true -e "PAUSED" -w 300 -c 30 includeHeaders=false
+            echo "Integration Server on ${spm.alias} node is running in Quiesce mode" >> $LOGDIR/$LOGFILE
+          fi
+          if [ "${environment.type}" != "egw" ]
+          then
+          JOBID_IS=`${cc.home}sagcc exec lifecycle pause ${spm.alias2} integrationServer-${internalIs.instance.name} properties=job.id includeHeaders=false`
+          ${cc.home}sagcc get jobmanager jobs $JOBID_IS properties=status -e "DONE" -w 300 -c 30 includeHeaders=false
+          ${cc.home}sagcc get monitoring state nodeAlias=${spm.alias2} runtimeComponentId=integrationServer-${internalIs.instance.name} refresh=true -e "PAUSED" -w 300 -c 30 includeHeaders=false
+          echo "Integration Server on ${spm.alias2} node is running in Quiesce mode" >> $LOGDIR/$LOGFILE
+          fi
+          echo "END of Maintenance PreMaintenance Pre-Script" >> $LOGDIR/$LOGFILE 
+
+    version: ${}
+    repo.product: ${}
+    repo.fix: ${} 
+      
+    os.username: ${}
+    os.password: ${}
+    os.port: ${}
+    os.auth.method: ${}
+    os.auth.key: ${}
+    os.platform: ${}
+    java.path: ${}
+
+
+    spm.host: ${}
+    spm.host2: ${}
+    spm.alias: ${}
+    spm.alias2: ${}
+    spm.port: ${}
+    spm.port2: ${}
+    spm.secure: ${}
+    spm.secure2: ${}
+    spm.distribution: ${}
+    spm.distribution2: ${}
+
+    spm.useImage: true
+    
+    gatewayIs.configure: ${}
+    internalIs.configure: ${}
+        
+    scriptsLogDir: ${}
+
+  gwy:                                                 # specific to EG server details
+    spm.alias:    ${}                                  # spm of Enterprise GateWay Server
+    spm.host:     ${}                                  # Host name for GateWay server
+    java.path:    ${}
+    install.dir:  ${}                                  # SAG installation directory  for GateWay server
+    egwIs.instance.name: ${}
+    instance.name: ${egwIs.instance.name}              # IS instance name for Enterprise Gateway server
+
+  internal:                                            # specific to Internal server details
+    spm.alias2:    ${}                                 # spm of Enterprise Internal Server
+    spm.host2:     ${}                                 # Host name for Internal server
+    java.path:     ${}
+    install.dir2:  ${}                                 # SAG installation directory  for Internal server
+    internalIs.instance.name: ${}
+    instance.name: ${internalIs.instance.name}         # IS instance name for Internal server
+    internalIs.license.key.alias: ${}                  # License file name for Internal IS
+
+
+###
+## Layers - groups of identically setup nodes to perform specific role
+## within this environment
+#####
+layers:
+  default:                                  # default configuration for all layers
+    productRepo: ${repo.product}            # repo to install products from
+    fixRepo:     ${repo.fix}                # repo to install fixes from
+        
+  gatewayIS:
+    description: Maintenance activity on Internal IS
+    templates:   ${gatewayIs.configure}
+
+  internalIS:
+    description: Maintenance activity on Internal IS
+    templates:   ${internalIs.configure}
+
+  
+###
+## Inline templates - customized product list, fix list, runtime instances, files and configuration
+####
+templates:
+  # Maintenance Activities on Enterprise GateWay Integration Server in Quiesce Mode
+  gateway-is:
+    description: Enterprise Gateway IS activities in Quiesce mode
+    fixes: ${egw.fixes}
+    files:
+      #Property file copy
+      IntegrationServer/instances/${egwIs.instance.name}/packages/CCMaintenanceUtil.cnf: ${prop.filepath}
+    actions:
+      egwISActivities.sh:
+        description:  Copy Maintenance and Support utility packages to Enterprise Gateway IS
+        target: POSIX
+        failOnError: true
+        phase: post
+        script: |
+          #!/bin/sh
+          cp -R ${CCEDEPOTDIR}/${COMMONDIR}/${EGWPKGDIR}/* ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages
+          cp -a ${CCEDEPOTDIR}/${COMMONDIR}/supportingPackage/CCE_MaintenenceUtility ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages
+          mv ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages/CCMaintenanceUtil.cnf ${install.dir}/IntegrationServer/instances/${egwIs.instance.name}/packages/CCE_MaintenenceUtility/config/CCMaintenanceUtil.cnf
+
+
+  # Maintenance Activities on Internal Integration Server in Quiesce Mode
+  internal-is:
+    description: Internal IS activities in Quiesce mode
+    fixes: ${internal.fixes}
+    files:
+      #Property file copy
+      IntegrationServer/instances/${internalIs.instance.name}/packages/CCMaintenanceUtil.cnf: ${prop.filepath}
+    licenses:
+      "IntegrationServer/config/licenseKey.xml": ${internalIs.license.key.alias}
+    products:
+      wmprt:
+      integrationServer: # the core IS product that owns the instance
+        ${internalIs.instance.name}:
+          license.file: IntegrationServer/config/licenseKey.xml
+          package.list: WmDesigner
+    actions:
+      internalISActivities.sh:
+        description:  Copy Maintenance and Support utility packages to Internal IS
+        target: POSIX
+        failOnError: true
+        phase: post
+        script: |
+          #!/bin/sh
+          cp -R ${CCEDEPOTDIR}/${COMMONDIR}/${INTERNALPKGDIR}/* ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages
+          cp -a ${CCEDEPOTDIR}/${COMMONDIR}/supportingPackage/CCE_MaintenenceUtility ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages
+          mv ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages/CCMaintenanceUtil.cnf ${install.dir2}/IntegrationServer/instances/${internalIs.instance.name}/packages/CCE_MaintenenceUtility/config/CCMaintenanceUtil.cnf
+          
+
+
+
+###
+## Provisioning map of layers to nodes for each environment type
+####
+provision:
+  egw:
+    gatewayIS:   ["${spm.alias}"]
+
+  internal:
+    internalIS:   ["${spm.alias2}"]
+
+  internal_egw:
+    gatewayIS:   ["${spm.alias}"]
+    internalIS:   ["${spm.alias2}"]
+
+nodes:
+  default:
+    default:
+      secure: ${spm.secure}
+      bootstrapInfo:
+        repoName:     ${repo.spm}
+        platform:     ${os.platform}
+        distribution: ${spm.distribution}
+        useImage:     ${spm.useImage}
+        port:         ${os.port}
+        credentials:
+          userName:   ${os.username}
+          password:   ${os.password}
+          authenticationMethod: ${os.auth.method}
+          privateKey: ${os.auth.key}
+          javaPath: ${java.path}
+  egw:
+    ${spm.alias}:
+      host: ${spm.host}
+      port: ${spm.port}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir}
+
+  internal:
+    ${spm.alias2}:
+      host: ${spm.host2}
+      port: ${spm.port2}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir2}
+
+  internal_egw:
+    ${spm.alias}:
+      host: ${spm.host}
+      port:   ${spm.port}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir}
+
+    ${spm.alias2}:
+      host: ${spm.host2}
+      port:   ${spm.port2}
+      javaPath: ${java.path}
+      bootstrapInfo:
+       installDir: ${install.dir2}
+

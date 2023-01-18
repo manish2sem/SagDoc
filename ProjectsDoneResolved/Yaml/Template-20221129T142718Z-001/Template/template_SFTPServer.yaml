@@ -1,0 +1,147 @@
+###############################################################################
+#  Copyright 2013 - 2018 Software AG, Darmstadt, Germany and/or its licensors
+#
+#   SPDX-License-Identifier: Apache-2.0
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.                                               
+#
+###############################################################################
+alias: sag-is-config
+description: Integration Server configurations
+
+environments:
+  default:
+    nodes:               node
+   # is.um.url:           ${}               # REQUIRED: UM realm server or cluster URL
+    is.instance.name:    default           # EXISTING IS/MSR instance name    
+    is.configs:                            # Configurations to apply
+      - sftp                          # IS to UM messaging alias
+
+layers:
+  runtime:
+    templates: ${is.configs}
+
+templates:
+  sftp:
+    descripton: Configure Schedule Task
+    products:
+      integrationServer:
+        ${is.instance.name}:
+          configuration:
+            integrationServer-${is.instance.name}:
+              COMMON-VARS:
+                COMMON-VARS:
+                  Variable:
+                    "@key": bm_21cTechnicalUserName1
+                    "@secure": false
+                    "$": "sys21cng!${bm.mandant}"
+                COMMON-VARS:
+                  Variable:
+                    "@key": bm_21cTechnicalMandant2
+                    "@secure": false
+                    "$": "${bm.mandant}"            
+              # IS-SFTP-SERVERALIAS:
+                # IS-SFTP-SERVERALIAS-Hema:
+                  # ServerAlias: Hema
+                  # HostName: eurekavm.eur.ad.sag
+                  # Port: '2223'
+                  # HostKeyLocation: ''
+                  # FingerPrint: SHA256:rKdlEWHtRl6WCW7PomDAmu7z3E4a4iX659UWPMxBr84
+                  # Version: v2
+                  # MinDhKeySize: '1024'
+                  # MaxDhKeySize: '8192'
+                  # KeyExchangeAlgoVer2:
+                  # - diffie-hellman-group-exchange-sha256
+                  # - curve25519-sha256@libssh.org
+                  # - diffie-hellman-group18-sha512
+                  # - diffie-hellman-group17-sha512
+                  # - diffie-hellman-group16-sha512
+                  # - diffie-hellman-group15-sha512
+                  # - diffie-hellman-group14-sha256
+                  # - diffie-hellman-group-exchange-sha1
+                  # - diffie-hellman-group14-sha1
+                  # MACS2CAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # MACC2SAlgoVer2:
+                  # - hmac-sha2-256
+                  # - hmac-sha256
+                  # - hmac-sha256@ssh.com
+                  # - hmac-sha2-256-etm@openssh.com
+                  # - hmac-sha2-256-96
+                  # - hmac-sha512
+                  # - hmac-sha2-512
+                  # - hmac-sha512@ssh.com
+                  # - hmac-sha2-512-etm@openssh.com
+                  # - hmac-sha2-512-96
+                  # - hmac-sha1
+                  # - hmac-sha1-etm@openssh.com
+                  # - hmac-sha1-96
+                  # - hmac-ripemd160
+                  # - hmac-ripemd160@openssh.com
+                  # - hmac-ripemd160-etm@openssh.com
+                  # - hmac-md5
+                  # - hmac-md5-etm@openssh.com
+                  # - hmac-md5-96
+                  # CiphersS2CAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com
+                  # CiphersC2SAlgoVer2:
+                  # - aes128-ctr
+                  # - aes192-ctr
+                  # - aes256-ctr
+                  # - 3des-ctr
+                  # - 3des-cbc
+                  # - blowfish-cbc
+                  # - aes128-cbc
+                  # - aes192-cbc
+                  # - aes256-cbc
+                  # - arcfour
+                  # - arcfour128
+                  # - arcfour256
+                  # - aes128-gcm@openssh.com
+                  # - aes256-gcm@openssh.com 
+
+                               
+provision:
+  default:
+    runtime: ${nodes}

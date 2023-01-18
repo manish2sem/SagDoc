@@ -1,0 +1,64 @@
+
+CC
+	IS -> Configuration -> Properties -> Extended Settings
+
+
+updating extended settings with YAML must not overwrite the "wat.server.extendedSettingsList", it must only "concatenate" changes to the list 
+
+Some customers use the extended settings like "global variables" (but they started before this was available). 
+Note: the customer's custom extended settings must be preserved. 
+
+
+
+Setting for the UI Binding to implement 'overwrite' behavior - 
+The setting is: twoPhaseCommitEnabled="true|false". An example of this is available at: http://irepo/projects/CC/repos/spm/browse/modules/configuration/src/main/resources/javaSysPropsDefaultUiBinding.xml 
+
+
+
+Making an update additive by default poses challenges with deleting an already existing set of properties. 
+
+
+we are not using any UI, 
+	the changes are done programmatically – automatically using CCE and Composite Templates (YAML) for migration 
+	followed by updates of the settings – 
+	those MUST be done before the first IS restart because otherwise the system would connect to legacy systems and worst case could steal / corrupt data there. 
+	So what you say means as workaround to have multiple independent YAML runs for each change. 
+	
+	That’s not really the goal of “automation”.  
+	Also each time the IS would be restarted, this costs time and include the above mentioned risk / challenge to prevent the system from running like a legacy system. 
+	
+
+
+Customer issue with not using additive extended properties:
+	if the customer has a hand full of items he wants to see and check regularly those are lost each time we run an automated updated. 
+	Change from YAML not from IS Admin UI
+	
+	
+	Trying to apply multiple changes to IS settings using command central in one template run us cause the IS SPM Plugin to not handle it correctly.
+	Only the last change win instead dealing with it additively. 		
+	The expecation is that the changes are done "additive", so a superset of changes is finally applied to the IS before restarting it.
+
+
+
+The CC UI behavior can continue to be the same as before even if the backend changes to handle additive properties. 
+	The UI retrieves current set of properties that the user can modify values or add new properties. The entire set will be submitted to the backend. 
+	We even have option in UI binding to two stage commit where UI would submit first PUT request with empty data set and 'reset' the settings and then second request with the user specified properties. 
+	But the backend needs to handle additive properties because the template usually does NOT know or what to control the entire set, only the properties that need to be modified or added. 
+	We have this the same situation with COMMON-JVM-OPTIONS, COMMON-JAVASYSPROPS.
+So what we need to is modify IS SPM backend implementation to handle additive COMMON-SYSPROPS (IS Settings) and tune up the UI Binding to achieve desired behavior where the user can add, update or remove any property. 
+
+
+Approach:
+	Keep the current design as default
+	Add additive_props_add in IS code
+		This will add any property to the corresponding cnf file.
+		If property is already there you need to update it with new value.
+		You need to provide some mechanism for deleting properties as well.	
+	additive_props_add should be called in case of request comes from YAML.
+	In all other case behavior will be same as current.
+	
+	COMMON-JVM-OPTIONS, COMMON-JAVASYSPROPS need to be additive too. They are not extended props.
+	wat.server.extendedSettingsList must not be over-ridden. it must only "concatenate" changes to the list.
+	
+	
+	

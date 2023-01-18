@@ -1,0 +1,183 @@
+SPM Development
+
+C:\IS_srcCode\Ver_912_latest\command-central\spm-impl\src\main\resources\OSGI-INF\ISResourceSettingsComponent.xml
+	  	<implementation class="com.softwareag.platform.management.is.configuration.impl.ResourceSettingsManager"/>
+
+	
+C:\IS_srcCode\Ver_912_latest\command-central\spm-impl\src\main\resources\OSGI-INF\ISResourcesUIBinder.xml
+	 	<property name="uiBindingPath" type="String" value="/isresourcesUiBinding.xml"/>
+
+
+C:\IS_srcCode\Ver_912_latest\command-central\spm-impl\src\main\resources\isresourcesUiBinding.xml <!-- Contains UI resources ->
+	This file makes up UI resources of SPM UI page.
+
+
+C:\IS_srcCode\Ver_912_latest\command-central\spm-impl\src\main\xsd\ResourceSettings.xsd
+
+
+
+Current Issues:
+	How to do dev-based configuration of SPM into CC.
+		Lot of class are not in CC path as this is not the case of installed SPM.
+	
+	genereated class (from XSD files) are not imported in manager java class.
+		import com.softwareag.platform.management.is.types.resourcesettings.DocumentDefaultStore; givining compile time issue with 
+		command-central\spm-impl\src\main\java\com\softwareag\platform\management\is\configuration\impl\ResourceSettingsManager.java
+		
+	One solution is:
+		execute SPM 
+			gradlew equinoxAcCleanProfileSPM 
+			delete staging folder of  C:\Project\Code\branches\develop\features\spm 
+ 			gradlew  startSPM
+ 			copy generated jar file from  C:\Project\Code\branches\develop\features\spm\staging\p2\plugins to
+ 				C:\SoftwareAG\SAG_910\common\runtime\bundles\spm-is\eclipse\plugins\com.softwareag.plm.spm.is.impl_9.10.0.0000-0106.jar
+ 				
+ 
+ Generating java file from XSD file 
+ 	xsd file : command-central\spm-impl\src\main\xsd\SimpleSchema.xsd
+ 	Java location: C:\IS_srcCode\ver_912_jan4\command-central\spm-impl\staging\java\main\com\softwareag\platform\management\is\types\simpleschema
+ 	build-command: gradlew build
+ 	
+ 	Changes (in gradle): mandatory
+ 		Add below line into command-central\spm-impl\build.gradle
+ 		Earlier: compileJava.dependsOn compileSchemaResourceSettings, compileSchemaWSEndpointsAlias, compileSchemaFileAccessPermission
+ 		Now: compileJava.dependsOn compileSchemaResourceSettings, compileSchemaWSEndpointsAlias, compileSchemaFileAccessPermission, compileSchemaSimpleSchema
+ 		
+ 	
+ 	Changes (in gradle): Need to check
+ 		\command-central\spm-impl\src\main\java\com\softwareag\platform\management\is\configuration\serializer\ISSimpleSchemaConfigurationSerializer.java
+ 		
+ 	With theses changes 
+ 		java file is generated properly at specified location
+ 		staging folders with requd jar got generated at C:\IS_srcCode\ver_912_jan4\features\spm
+ 	
+ 	
+ 	
+ 	How to make Object (extendedSettings) instanceof ExtendedSettings
+ 		- Added command-central\spm-impl\src\main\resources\OSGI-INF\ExtendedSettingsSerializer.xml
+
+
+
+Issue: Un-handled internal server error. class java.util.Properties nor any of its super class is known to this context.
+	Reason : ExtendedProperies is bound to java.util.Properties. This is wrong 
+		ExtendedProperies has to be of type ExtendedProperies .
+	Soln: Need to override getConfigurationType as below:
+		Earlier:
+			@Override
+			public ConfigurationType getConfigurationType() throws IOException {
+				return ConfigurationTypesFactory.createCommonSysProps();
+
+			}
+
+		Now:
+			@Override
+			public ConfigurationType getConfigurationType() throws IOException {
+				return ISConfigurationTypesFactory.createISExtendedSettings();
+			}
+	 		
+Now get is working fine but update is still throwing same error: Un-handled internal server error. class java.util.Properties nor any of its super class is known to this context.
+
+	This is because, our loadConfiguration configuration was returning java.util.Properties not ExtendedProperies.
+	We did it intentinally. Our idea was 
+				not to change loadConfiguration, keep it as property.
+				While updating take input as xml(extended settings) but change it as property without handling it to IS service. 
+				But for above exception (limitation) we need to modify our approach.
+	Solution: 
+		Now loadConfiguration will return  extendedSettings object, by wrapping property inside extendedSettings.getUpdateSettings().
+
+ With these changes, basic model is working fine.
+ 
+ Few scenarios, we need to take care
+ 	1. when both COMMON-SYSPROPS and IS-SYSPROPS-APPEND run through template file.
+ 	2. When same propery is used under both metadata - COMMON-SYSPROPS and IS-SYSPROPS-APPEND.
+ 	3. Some message-id is used for new configuration-type - PIESIMI0081. how to add them.
+ 	4. Synchronization on update part of properies as both IS-SYSPROPS-APPEND and COMMON-SYSPROPS are working on same cnf file.
+ 	
+ 	
+ 	
+ Changes:
+    Java
+ 	package com.softwareag.platform.management.is.configuration.types.ISConfigurationTypesFactory.java
+ 	package com.softwareag.platform.management.is.configuration.impl.ISExtendedSettingsConfigurationManager.java
+ 	package com.softwareag.platform.management.is.configuration.serializer.ISExtendedSettingsConfigurationSerializer.java
+ 	command-central\spm-impl\src\main\java\com\softwareag\platform\management\is\configuration\ISConfigurationTypeCategories.java
+    XML
+ 	command-central\spm-impl\src\main\resources\OSGI-INF\ISExtendedSettingsComponent.xml
+ 	command-central\spm-impl\src\main\resources\OSGI-INF\ISExtendedSettingsSerializer.xml
+ 	command-central\spm-impl\src\main\xsd\SimpleSchema.xsd
+    build
+ 	command-central\spm-impl\build.gradle
+
+
+
+Commit - Completed: At revision: 1603061  
+
+
+
+Issues:
+	Mixed content did not work.
+	Probably CC code doesn't support this.
+	
+	 <ErrorMessage>Can not instantiate value of type 
+	 	[map type; class java.util.HashMap, [simple type, class java.lang.String] -&gt; [simple type, class java.lang.Object]]	 	
+ 		from JSON String; no single-String constructor/factory method</message>
+ 	On RestClient with below input:
+ 		""UpdateSettings":"watt.server.requestCerts1=false watt.server.requestCerts2=false watt.server.requestCerts3=true","$":" \n"}
+		"DeleteSettings":"watt.server.requestCerts1=false watt.server.requestCerts2=false watt.server.requestCerts3=true","$":"  	\n
+		 watt.server.requestCerts1=false\n
+		 watt.server.requestCerts2=false\n"}
+		 
+To handle additive updates in Extended Settings we created a new configuration type IS-SYSPROPS. 	
+ There is no GUI provided for IS-SYSPROPS, it can be used only with CC Template (YAML file). 
+ 
+ Use Case:
+     IS-SYSPROPS:
+	IS-SYSPROPS:
+	 Settings:
+	    watt.core.template.enableFilterHtml1=false
+    	    watt.core.template.enableSecureUrlRedirection1=false
+	  UpdateSettings:
+	    watt.core.template.enableFilterHtml1=false
+	    watt.core.template.enableSecureUrlRedirection1=false                 
+	    watt.core.template.man=Mani
+	    watt.core.template.test=Mani
+	  DeleteSettings:
+	    watt.core.template.enableFilterHtml1=false
+    	    watt.core.template.enableSecureUrlRedirection1=false
+    	 
+    When only Settings is provided then, it would work as COMMON-SYSPROPS i.e. all properies will be overridden.
+    When only  UpdateSettings is provided then, if properties exists there value will be modified with new value else new properties will be added.
+    When only  DeleteSettings is provided then, properties will be removed from existing list. If propertis are not listed in existing list then there will be no change.
+    Settings get preference over UpdateSettings and DeleteSettings i.e. if we provide all the three meta-data then only override will take place with the properties under settings.   
+
+
+
+Issue:  with scema IS
+Soln :  Validating the schema with 
+		<xs:pattern value="([a-zA-Z0-9\.])+=([a-zA-Z0-9])+" />
+
+Some special Charactes are allowed - @
+
+
+COMMON-SYSPROPS: Typical use case
+
+	To Provide multiple watt properties using YAML: Provide | (Pipe character) as separator as below    
+    	   COMMON-SYSPROPS:
+	      COMMON-SYSPROPS: |
+		     watt.PSUtilities.ACL.set=true                     
+		     watt.server.xarlock.logging=true
+		     watt.test.manish.manish=manish.manish
+		     watt.server.ssl.trustStoreAlias=SBus_MQ_TrustStore
+	     	     watt.server.xarlock.logging=true
+	
+	Using rest client : separate the watt properties with caharatcer "%0a" (see below) and assign it to variable settings.
+	 	http://localhost:5555/invoke/wm.server.admin:setExtendedSettings?settings=watt.manish=manish%0awatt.manish1=manish1
+	 
+	Using flow service (in designer)
+		Justpass values in new line i.e. each watt properties in different lines as input string.
+ 	
+ 	
+I-WIKI Resources :
+
+https://iwiki.eur.ad.sag/pages/viewpage.action?pageId=326536575
+https://iwiki.eur.ad.sag/display/RNDWMBPMS/Tutorial+Creating+New+Custom+Configuration+Type

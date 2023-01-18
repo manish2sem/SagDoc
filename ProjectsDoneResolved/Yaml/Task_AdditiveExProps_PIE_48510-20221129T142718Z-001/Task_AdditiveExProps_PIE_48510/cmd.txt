@@ -1,0 +1,31 @@
+Confirm your local CLI setup is functional by running the following command from the shell: 
+	cc list landscape nodes local -e ONLINE
+	cc list landscape nodes local -e ONLINE -s https://localhost:8096   -> When port is other than default (8091)
+
+cc delete templates composite is-layer-test1 --force
+cc exec templates composite import -i template.yaml
+cc list templates composite -e is-layer-test1
+cc exec templates composite apply is-layer-test1 -i sample.properties
+
+
+cc exec templates composite import -i localDevTemplate.yaml
+cc list templates composite -e tutorial
+cc exec templates composite apply tutorial -i windows.properties
+cc exec templates composite tutorial -i windows.properties
+
+
+
+cc list landscape nodes local -e ONLINE
+sagcc delete templates composite is-layer-test1 --force
+sagcc exec templates composite import -i template.yaml
+sagcc list templates composite -e is-layer-test1
+sagcc exec templates composite apply is-layer-test1 -i sample.properties
+
+
+
+
+C:\TEST\BootStrap\yaml>
+
+C:\TEST\BootStrap\yaml\localDevTemplate.yaml
+
++918058282622

@@ -1,0 +1,77 @@
+###############################################################################
+#  Copyright 2013 - 2018 Software AG, Darmstadt, Germany and/or its licensors
+#
+#   SPDX-License-Identifier: Apache-2.0
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License.
+
+
+# Commands:
+#      to delete template alias if already loaded:
+#                   cc delete templates composite sag-is-config --force
+#      to import :  cc exec templates composite import -i C:\TEST\template.yaml   
+#      to Execute : cc exec templates composite apply sag-is-config nodes=local is.configs=messaging is.instance.name=default 
+#       
+#      Explaination : 
+#                   nodes=local, here local is name of SPM alias. 
+#                   You can find out this in CCE UI : Home >Instances > ALL : then check for field "Installation Alias"                                                          
+#
+###############################################################################
+alias: sag-is-config
+description: Integration Server configurations
+
+environments:
+  default:
+    nodes:               node
+   # is.um.url:           ${}               # REQUIRED: UM realm server or cluster URL
+    is.instance.name:    default           # EXISTING IS/MSR instance name    
+    is.configs:                            # Configurations to apply
+      - scheduletask                          # IS to UM messaging alias
+
+layers:
+  runtime:
+    templates: ${is.configs}
+
+templates:
+  scheduletask:
+    descripton: Configure Schedule Task
+    products:
+      integrationServer:
+        ${is.instance.name}:
+          configuration:
+            integrationServer-${instance.name}:
+              IS-SCHEDULED-TASKS:
+                IS-SCHEDULED-TASKS-220f1720-980a-11e9-b703-000000000000:
+                  ServiceInfo:
+                    Description: DesignerTest1
+                    Service: pub.flow:debugLog
+                    User: Default
+                    TargetNode: MCMAKUM01.eur.ad.sag
+                  OverdueTask:
+                    OverdueOptions: '0'
+                    delay: '0'
+                  ScheduleType:
+                    ScheduleTypeOptions: once
+                    RunOnce:
+                      Date: 2020/01/01
+                      Time: '10:10:10'
+                  StatusOptionType: active
+                  ID: 220f1720-980a-11e9-b703-000000000000
+                  LastError: N/A
+                  QueueName: N/A
+                  NextRun: '15784619.2'
+                  Status: Active
+                  Interval: once       
+provision:
+  default:
+    runtime: ${nodes}

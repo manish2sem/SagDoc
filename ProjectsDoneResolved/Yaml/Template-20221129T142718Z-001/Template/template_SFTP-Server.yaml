@@ -1,0 +1,12 @@
+https://vm-trunk-lj01.eur.ad.sag 
+anupam / test123
+Use the solution: AMQJARUPD  
+
+https://siqa.saglive.com/integration 
+mjan@softwareag.com  
+
+
+if (newGroupName.equals(GROUP_ADMINISTRATORS) && (newMemberList.isEmpty() || !newMemberList.contains(USER_ADMINISTRATOR))) {
+				throwValidationException(getMessage(ISErrorMessages.PIESIME0183, USER_ADMINISTRATOR, newGroupName), 
+						getExplanation(ISErrorMessages.PIESIME0183, USER_ADMINISTRATOR, newGroupName));
+			}

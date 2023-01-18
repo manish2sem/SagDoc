@@ -1,0 +1,214 @@
+###############################################################################
+#  Copyright 2013 - 2018 Software AG, Darmstadt, Germany and/or its licensors
+#
+#   SPDX-License-Identifier: Apache-2.0
+#
+#     Licensed under the Apache License, Version 2.0 (the "License");
+#     you may not use this file except in compliance with the License.
+#     You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#     Unless required by applicable law or agreed to in writing, software
+#     distributed under the License is distributed on an "AS IS" BASIS,
+#     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#     See the License for the specific language governing permissions and
+#     limitations under the License. 
+# 
+# Commands:
+#      To test Connection : cc list templates composite -e sag-is-config
+#   To test Connection : cc list landscape nodes local -e ONLINE -s https://localhost:8091
+                       # cc list landscape nodes local -e ONLINE -s http://localhost:8200
+#      to delete template alias if already loaded:
+#                   cc delete templates composite sag-is-config --force
+#      to import :  cc exec templates composite import -i C:\Work-Space\Itrac-WS\WF-14667-SFTP\template_SFTPServer.yaml -s https://localhost:8091  
+#      to Execute : cc exec templates composite apply sag-is-config nodes=local is.configs=sftp is.instance.name=default 
+#                   cc exec templates composite apply sag-is-config nodes=Localhost-dev07 is.configs=sftp is.instance.name=default -s https://localhost:8091
+
+#      cc list :    cc list templates composite -e is-layer-test1 -s http://localhost:8091
+#       
+#      Explaination : 
+#                   nodes=Localhost, here Localhost is name of SPM alias. 
+#                   You can find out this in CCE UI : Home >Instances > ALL : then check for field "Installation Alias"                                                          
+#                                              
+#
+###############################################################################
+alias: sag-is-config
+description: Integration Server configurations
+
+environments:
+  default:
+    nodes:               node
+    is.instance.name:    default           # EXISTING IS/MSR instance name    
+    is.configs:                            # Configurations to apply
+      - sftp                          # IS to UM messaging alias
+
+layers:
+  runtime:
+    templates: ${is.configs}
+
+templates:
+  sftp:
+    descripton: Configure Schedule Task
+    products:
+      integrationServer:
+        ${is.instance.name}:
+          configuration:
+            integrationServer-${is.instance.name}:
+              IS-SCHEDULED-TASKS:
+                IS-SCHEDULED-TASKS-66b87bb0-10db-11ea-af00-000000000000:
+                  ServiceInfo:
+                    Description: pub.flow:debugLogTest
+                    Service: pub.flow:debugLog
+                    User: Administrator
+                    TargetNode: Any Server
+                  OverdueTask:
+                    OverdueOptions: '0'
+                    delay: '0'
+                  ScheduleType:
+                    ScheduleTypeOptions: repeat
+                    Repeating:
+                      StartDate: 2019/12/27
+                      StartTime: '11:31:49'
+                      DonotOverlap: 'true'
+                      Interval: '600'
+                  StatusOptionType: active
+                  ID:
+                  ParentID: 'False'
+                  LastError: N/A
+                  QueueName: N/A
+                  NextRun: '540.4'
+                  Status: active
+                  Interval: '600.0'
+                IS-SCHEDULED-TASKS-fd7cffd0-32d2-11ea-bdb0-000000000000:
+                  ServiceInfo:
+                    Description: pub.flow:debugLogTestComplex
+                    Service: pub.flow:debugLog
+                    User: Administrator
+                    TargetNode: Any Server
+                  OverdueTask:
+                    OverdueOptions: '0'
+                    delay: '0'
+                  ScheduleType:
+                    ScheduleTypeOptions: complex
+                    ComplexRepeating:
+                      StartDate: 2021/01/09
+                      StartTime: '16:57:16'
+                      DonotOverlap: 'true'
+                      RunMask:
+                        Months:
+                        - '0'
+                        - '1'
+                        - '2'
+                        - '3'
+                        - '4'
+                        - '5'
+                        - '6'
+                        - '7'
+                        - '8'
+                        - '9'
+                        - '10'
+                        - '11'
+                        Days:
+                        - '0'
+                        - '1'
+                        - '2'
+                        - '3'
+                        - '4'
+                        - '5'
+                        - '6'
+                        - '7'
+                        - '8'
+                        - '9'
+                        - '10'
+                        - '11'
+                        - '12'
+                        - '13'
+                        - '14'
+                        - '15'
+                        - '16'
+                        - '17'
+                        - '18'
+                        - '19'
+                        - '20'
+                        - '21'
+                        - '22'
+                        - '23'
+                        - '24'
+                        - '25'
+                        - '26'
+                        - '27'
+                        - '28'
+                        - '29'
+                        - '30'
+                        WeeklyDays:
+                        - '1'
+                        - '2'
+                        - '3'
+                        - '4'
+                        - '5'
+                        Hours:
+                        - '14'
+                        - '15'
+                        - '16'
+                        - '17'
+                  StatusOptionType: active
+                  ID:
+                  ParentID: 'False'
+                  LastError: N/A
+                  QueueName: N/A
+                  NextRun: '26.2'
+                  Status: active
+                  Interval: |-
+                    Months : January, February, March, April, May, June, July, August, September, October, November, December
+                    Days : 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+                    Days of Week : Monday, Tuesday, Wednesday, Thursday, Friday
+                    Hours : 14, 15, 16, 17
+                    Minutes : 0..59
+                IS-SCHEDULED-TASKS-e71e7db0-32c6-11ea-b7b5-000000000000:
+                  ServiceInfo:
+                    Description: pub.flow:debugLogOnce
+                    Service: pub.flow:debugLog
+                    User: Administrator
+                    TargetNode: Any Server
+                  OverdueTask:
+                    OverdueOptions: '0'
+                    delay: '0'
+                  ScheduleType:
+                    ScheduleTypeOptions: once
+                    RunOnce:
+                      Date: 2021/01/25
+                      Time: '12:12:12'
+                  StatusOptionType: active
+                  ID:
+                  ParentID: 'False'
+                  LastError: N/A
+                  QueueName: N/A
+                  NextRun: '1364294.8'
+                  Status: active
+                  Interval: once
+                IS-SCHEDULED-TASKS-2bf7ed40-32d6-11ea-8b57-000000000000:
+                  ServiceInfo:
+                    Description: pub.flow:debugLogsuspend
+                    Service: pub.flow:debugLog
+                    User: Administrator
+                    TargetNode: Any Server
+                  OverdueTask:
+                    OverdueOptions: '0'
+                    delay: '0'
+                  ScheduleType:
+                    ScheduleTypeOptions: once
+                    RunOnce:
+                      Date: 2021/01/20
+                      Time: '12:12:12'
+                  StatusOptionType: suspended
+                  ID:
+                  ParentID: 'False'
+                  LastError: N/A
+                  QueueName: N/A
+                  NextRun: '-'
+                  Status: Suspended
+                  Interval: once
+provision:
+  default:
+    runtime: ${nodes}
