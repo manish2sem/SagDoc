@@ -8,11 +8,13 @@ gradlew equinoxAcStopIS
 gradlew equinoxAcStartDebugIS 10033
 
 gradlew equinoxAcStartIS -x equinoxAcInstallIS -x createInstanceDefault -x javadoc
+
+
 gradlew equinoxAcStartIS -x javadoc -x test
 
 gradlew equinoxAcStartIS -x javadoc -x test -PuseLocalizationCache=false
 
-gradlew equinoxAcStartIS -x javadoc -x test
+gradlew equinoxAcStartIS -x javadoc -x test --offline
 
 gradlew equinoxAcStartIS --refresh-dependencies -x javadoc -x test
 
