@@ -3,6 +3,7 @@ C:\IS_srcCode\ver_100\settings\ac.gradle
 gradlew eclipse
 gradlew build
 gradlew clean --refresh-dependencies -PuseLocalizationCache=false
+gradlew clean --refresh-dependencies
 gradlew equinoxAcStartIS
 gradlew equinoxAcStopIS
 gradlew equinoxAcStartDebugIS 10033
