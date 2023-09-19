@@ -13,6 +13,8 @@ gradlew equinoxAcStartIS -x equinoxAcInstallIS -x createInstanceDefault -x javad
 
 gradlew equinoxAcStartIS -x javadoc -x test
 
+gradlew equinoxAcStopIS -x javadoc -x test
+
 gradlew equinoxAcStartIS -x javadoc -x test -PuseLocalizationCache=false
 
 gradlew equinoxAcStartIS -x javadoc -x test --offline

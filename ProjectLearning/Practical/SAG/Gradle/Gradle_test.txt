@@ -7,10 +7,15 @@ running Unit test for package
 Testing of integration test[change test name]
 	C:\IS_srcCode\ver_100_Latest>gradlew :tests:is-server-test:integrationTest  --tests ExportMigrationSettingsTest -x equinoxAcInstallIS -x equinoxAcStartIS -x equinoxAcCreateProfileIS	
 
+gradlew :tests:is-server-test:spmIntegrationTest  --tests ExportMigrationSettingsTest -x equinoxAcInstallIS -x equinoxAcStartIS -x equinoxAcCreateProfileIS	
+
+
+
 Running integrationTest for one testcase file only : in this case .. it is ReportTest.java 
 [C:\IS-Checkout\freshDevelop\tests\server\src\integTest\java\pub\ReportTest.java]
 	C:\IS_srcCode\ver_100_Latest>gradlew :tests:is-server-test:integrationTest --tests *ReportTest --rerun-tasks -x copyExternalDependencies -x copyLicenseKeys -x copyPolicies -x copySSOPropertiesToIS -x copyInstanceTemplate -x configurePropertiesIni -x configurePropertiesIS -x syncPkg -x copyIntegrationServerResources -x equinoxAcCreateProfileIS -x generateP2 -x createInstanceDefault
-	
+gradlew :tests:is-server-test:integrationTest --tests *ReportTest --rerun-tasks -x copyExternalDependencies -x copyLicenseKeys -x copyPolicies -x copySSOPropertiesToIS -x copyInstanceTemplate -x configurePropertiesIni -x configurePropertiesIS -x syncPkg -x copyIntegrationServerResources -x equinoxAcCreateProfileIS -x generateP2 -x createInstanceDefault
+
 	
 
 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -36,3 +41,18 @@ compiling package
 
 Regression Test : 
 gradlew test:is-server-test:integrationTest --tests NodeResourceTest -x equinoxAcStartIS -x javadoc --offline
+gradlew test:is-server-test:integrationTest --tests ScheduledTasksDeployTest -x equinoxAcStartIS -x javadoc --offline
+
+
+Below command was failing:
+	gradlew test:is-server-test:integrationTest --tests ScheduledTasksDeployTest -x equinoxAcStartIS -x javadoc --offline
+To make it success modified the following build.gradle file 
+	C:\Users\MAKUM\SAG_SRC\MainAug24\esb\tests\server\build.gradle
+and added below line
+	include 'com/wm/app/b2b/server/deployer/ScheduledTasksDeployTest.class'  - at line no 193
+
+
+
+
+
+287645
